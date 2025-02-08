@@ -5,7 +5,55 @@
 
 
 
-//Init
+typedef struct {
+  int x; // position x
+  int y; // position y
+} Plot;
+
+Plot* makePlot(int x, int y) {
+  Plot *plot = malloc(sizeof(Plot));
+  plot->x = x;
+  plot->y = y;
+  return plot;
+}
+
+typedef struct {
+  Plot **plots; // list of plot pointers
+} City;
+
+City* makeCity(int nbPlots) {
+  City *city = malloc(sizeof(City));
+  city->plots = malloc(nbPlots * sizeof(Plot*));
+  return city;
+}
+
+typedef struct {
+  int bottomSize; // floor bottom size
+  int topSize; // floor top size
+  int height; // floor height compared to ground level
+  Plot *plot; // the plot on which the floor is built
+} Floor;
+
+Floor* makeFloor(int bottomSize, int topSize, int height, Plot *plot) {
+  Floor *floor = malloc(sizeof(Floor));
+  floor->bottomSize = bottomSize;
+  floor->topSize = topSize;
+  floor->height = height;
+  floor->plot = plot;
+  return floor;
+}
+
+typedef struct {
+  Floor **floors; // list of floor pointers
+} FloorGroup;
+
+FloorGroup* makeFloorGroup(Floor **floors) {
+  FloorGroup *floorGroup = malloc(sizeof(FloorGroup));
+  floorGroup->floors = floors;
+  return floorGroup;
+}
+
+
 
 void Init(Color backgroundColor) {
   SetConfigFlags(FLAG_WINDOW_TOPMOST || FLAG_WINDOW_RESIZABLE);
@@ -56,10 +104,8 @@ void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle,
 
 
 
-//Main
-
 int main() {
-  //Init
+  // init
   Color backgroundColor = (Color) {200, 200, 200, 255};
   Init(backgroundColor);
   ToggleFullscreen();
@@ -67,7 +113,7 @@ int main() {
   int screenWidth = GetScreenWidth();
   int screenHeight = GetScreenHeight();
 
-  // Camera control
+  // camera control
   float pi = 3.141592;
   float verticalAngle = pi / 4.;
   float horizontalAngle = pi / 4.;
@@ -80,10 +126,22 @@ int main() {
   camera.fovy = 70.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
 
+  // making the city
+  Plot *plot1 = makePlot(0, 0);
+  Plot *plot2 = makePlot(0, 1);
+  Plot *plot3 = makePlot(0, 2);
+  City *city1 = makeCity(3);
+  city1->plots[0] = plot1;
+  city1->plots[1] = plot2;
+  city1->plots[2] = plot3;
+  Floor *floor1 = makeFloor(3, 2, 0, plot1);
+  Floor *floor2 = makeFloor(2, 1, 0, plot2);
+  Floor *floor2 = makeFloor(2, 1, 1, plot3);
+  
   Vector3 cubePosition = {0.0f, 0.0f, 0.0f};
 
   while (!WindowShouldClose()) {
-    //Resize
+    // resize window
     if (IsWindowResized()) {
       screenWidth = GetScreenWidth();
       screenHeight = GetScreenHeight();
@@ -91,7 +149,7 @@ int main() {
 
     updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
 
-    //Drawing
+    // drawing
     BeginDrawing();
       ClearBackground(backgroundColor);
       BeginMode3D(camera);
@@ -103,6 +161,6 @@ int main() {
   }
   CloseWindow();
 
-  //De-init
+  // de-init
   return 0;
 }
