@@ -150,11 +150,24 @@ void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle,
 
 void drawFloor(Floor *floor) {
   int maxFloorSize = 8;
+  float height = 0.2;
   Plot *plot = floor->plot;
-  Vector3 position = (Vector3) {plot->x, 0.5 * floor->height, plot->y};
-  float radius = (double) floor->bottomSize / (double) maxFloorSize;
-  DrawCylinder(position, radius, radius, 0.5, 4, BLUE);
-  DrawCylinderWires(position, radius, radius, 0.5, 4, WHITE);
+  Vector3 position = (Vector3) {plot->x, height * floor->height, plot->y};
+  float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
+  DrawCylinder(position, radius, radius, height, 4, BLUE);
+  DrawCylinderWires(position, radius, radius, height, 4, WHITE);
+}
+
+void drawPlot(Plot *plot) {
+  Vector3 position = (Vector3) {plot->x, -0.5, plot->y};
+  DrawCube(position, 1., 1., 1., GRAY);
+  DrawCubeWires(position, 1., 1., 1., BLACK);
+}
+
+void drawCity(City *city) {
+  for (int i = 0; i < city->nbPlots; i++) {
+    drawPlot(city->plots[i]);
+  }
 }
 
 
@@ -185,17 +198,37 @@ int main() {
   Plot *plot1 = makePlot(0, 0);
   Plot *plot2 = makePlot(0, 1);
   Plot *plot3 = makePlot(0, 2);
-  City *city1 = makeCity(3);
+  Plot *plot4 = makePlot(0, 3);
+  City *city1 = makeCity(4);
   city1->plots[0] = plot1;
   city1->plots[1] = plot2;
   city1->plots[2] = plot3;
-  Floor *floor1 = makeFloor(3, 2, 0, plot1);
-  Floor *floor2 = makeFloor(2, 1, 1, plot1);
-  Floor *floor3 = makeFloor(2, 1, 0, plot3);
-  FloorList *floorList = makeFloorList(3);
+  city1->plots[3] = plot4;
+  Floor *floor1 = makeFloor(7, 6, 0, plot1);
+  Floor *floor2 = makeFloor(3, 2, 1, plot1);
+  Floor *floor3 = makeFloor(2, 1, 2, plot1);
+  Floor *floor4 = makeFloor(2, 1, 0, plot3);
+  Floor *floor5 = makeFloor(8, 7, 0, plot4);
+  Floor *floor6 = makeFloor(7, 6, 1, plot4);
+  Floor *floor7 = makeFloor(6, 5, 2, plot4);
+  Floor *floor8 = makeFloor(5, 4, 3, plot4);
+  Floor *floor9 = makeFloor(4, 3, 4, plot4);
+  Floor *floor10 = makeFloor(3, 2, 5, plot4);
+  Floor *floor11 = makeFloor(2, 1, 6, plot4);
+  Floor *floor12 = makeFloor(1, 0, 7, plot4);
+  FloorList *floorList = makeFloorList(12);
   floorList->floors[0] = floor1;
   floorList->floors[1] = floor2;
   floorList->floors[2] = floor3;
+  floorList->floors[3] = floor4;
+  floorList->floors[4] = floor5;
+  floorList->floors[5] = floor6;
+  floorList->floors[6] = floor7;
+  floorList->floors[7] = floor8;
+  floorList->floors[8] = floor9;
+  floorList->floors[9] = floor10;
+  floorList->floors[10] = floor11;
+  floorList->floors[11] = floor12;
   
   while (!WindowShouldClose()) {
     // resize window
@@ -210,7 +243,7 @@ int main() {
     BeginDrawing();
       ClearBackground(backgroundColor);
       BeginMode3D(camera);
-        DrawGrid(1000, 1.0f);
+        drawCity(city1);
         for (int i = 0; i < floorList->nbFloors; i++) {
           drawFloor(floorList->floors[i]);
         }
@@ -220,9 +253,6 @@ int main() {
   CloseWindow();
 
   // de-init
-  freeFloor(floor1);
-  freeFloor(floor2);
-  freeFloor(floor3);
   freeCity(city1);
   freeFloorList(floorList);
 
