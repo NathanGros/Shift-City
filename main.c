@@ -17,14 +17,27 @@ Plot* makePlot(int x, int y) {
   return plot;
 }
 
+void freePlot(Plot *plot) {
+  free(plot);
+}
+
 typedef struct {
+  int nbPlots;
   Plot **plots; // list of plot pointers
 } City;
 
 City* makeCity(int nbPlots) {
   City *city = malloc(sizeof(City));
+  city->nbPlots = nbPlots;
   city->plots = malloc(nbPlots * sizeof(Plot*));
   return city;
+}
+
+void freeCity(City *city) {
+  for (int i = 0; i < city->nbPlots; i++) {
+    freePlot(city->plots[i]);
+  }
+  free(city);
 }
 
 typedef struct {
@@ -43,14 +56,47 @@ Floor* makeFloor(int bottomSize, int topSize, int height, Plot *plot) {
   return floor;
 }
 
+void freeFloor(Floor *floor) {
+  freePlot(floor->plot);
+  free(floor);
+}
+
 typedef struct {
+  int nbFloors;
   Floor **floors; // list of floor pointers
 } FloorGroup;
 
-FloorGroup* makeFloorGroup(Floor **floors) {
+FloorGroup* makeFloorGroup(int nbFloors) {
   FloorGroup *floorGroup = malloc(sizeof(FloorGroup));
-  floorGroup->floors = floors;
+  floorGroup->nbFloors = nbFloors;
+  floorGroup->floors = malloc(nbFloors * sizeof(Floor*));
   return floorGroup;
+}
+
+void freeFloorGroup(FloorGroup *floorGroup) {
+  for (int i = 0; i < floorGroup->nbFloors; i++) {
+    freeFloor(floorGroup->floors[i]);
+  }
+  free(floorGroup);
+}
+
+typedef struct {
+  int nbFloors;
+  Floor **floors; // list of floor pointers
+} FloorList;
+
+FloorList* makeFloorList(int nbFloors) {
+  FloorList *floorList = malloc(sizeof(FloorList));
+  floorList->nbFloors = nbFloors;
+  floorList->floors = malloc(nbFloors * sizeof(Floor*));
+  return floorList;
+}
+
+void freeFloorList(FloorList *floorList) {
+  for (int i = 0; i < floorList->nbFloors; i++) {
+    freeFloor(floorList->floors[i]);
+  }
+  free(floorList);
 }
 
 
@@ -67,39 +113,48 @@ void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle,
   float cameraVectorZ = camera->target.z - camera->position.z;
   float cameraDistanceToTarget = sqrt(pow(cameraVectorX, 2.) + pow(cameraVectorZ, 2.));
   if (IsKeyDown(KEY_W)) {
-    camera->target.x += cameraVectorX / cameraDistanceToTarget;
-    camera->target.z += cameraVectorZ / cameraDistanceToTarget;
+    camera->target.x += speed * cameraVectorX / cameraDistanceToTarget;
+    camera->target.z += speed * cameraVectorZ / cameraDistanceToTarget;
   }
   if (IsKeyDown(KEY_S)) {
-    camera->target.x -= cameraVectorX / cameraDistanceToTarget;
-    camera->target.z -= cameraVectorZ / cameraDistanceToTarget;
+    camera->target.x -= speed * cameraVectorX / cameraDistanceToTarget;
+    camera->target.z -= speed * cameraVectorZ / cameraDistanceToTarget;
   }
   if (IsKeyDown(KEY_A)) {
-    camera->target.x += cameraVectorZ / cameraDistanceToTarget;
-    camera->target.z += -1. * cameraVectorX / cameraDistanceToTarget;
+    camera->target.x += speed * cameraVectorZ / cameraDistanceToTarget;
+    camera->target.z += -1. * speed * cameraVectorX / cameraDistanceToTarget;
   }
   if (IsKeyDown(KEY_D)) {
-    camera->target.x += -1. * cameraVectorZ / cameraDistanceToTarget;
-    camera->target.z += cameraVectorX / cameraDistanceToTarget;
+    camera->target.x += -1. * speed * cameraVectorZ / cameraDistanceToTarget;
+    camera->target.z += speed * cameraVectorX / cameraDistanceToTarget;
   }
 
   // camera angle
   if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
-    *horizontalAngle += GetMouseDelta().x * 0.03;
-    *verticalAngle += GetMouseDelta().y * 0.03;
+    *horizontalAngle += GetMouseDelta().x * 0.01;
+    *verticalAngle += GetMouseDelta().y * 0.01;
     if (*verticalAngle >= pi / 2.) *verticalAngle = pi / 2.;
     if (*verticalAngle <= 0.) *verticalAngle = 0.;
   }
 
   // camera zoom
   *targetDistance *= 1. - 0.3 * GetMouseWheelMove();
-  if (*targetDistance <= 4.) *targetDistance = 4.;
-  if (*targetDistance >= 50.) *targetDistance = 50.;
+  if (*targetDistance <= 2.) *targetDistance = 2.;
+  if (*targetDistance >= 30.) *targetDistance = 30.;
 
   // camera position
   camera->position.x = camera->target.x + *targetDistance * cos(*horizontalAngle) * cos(*verticalAngle);
   camera->position.y = camera->target.y + *targetDistance * sin(*verticalAngle);
   camera->position.z = camera->target.z + *targetDistance * sin(*horizontalAngle) * cos(*verticalAngle);
+}
+
+void drawFloor(Floor *floor) {
+  int maxFloorSize = 8;
+  Plot *plot = floor->plot;
+  Vector3 position = (Vector3) {plot->x, 0.5 * floor->height, plot->y};
+  float radius = (double) floor->bottomSize / (double) maxFloorSize;
+  DrawCylinder(position, radius, radius, 0.5, 4, BLUE);
+  DrawCylinderWires(position, radius, radius, 0.5, 4, WHITE);
 }
 
 
@@ -115,13 +170,13 @@ int main() {
 
   // camera control
   float pi = 3.141592;
-  float verticalAngle = pi / 4.;
-  float horizontalAngle = pi / 4.;
-  float targetDistance = 20.;
-  float speed = 1.;
+  float verticalAngle = pi / 6.;
+  float horizontalAngle = pi;
+  float targetDistance = 4.;
+  float speed = 0.1;
   Camera3D camera = {0};
   camera.position = (Vector3) {0.0f, 0.0f, 0.0f};
-  camera.target = (Vector3) {0.0f, 0.0f, 0.0f};
+  camera.target = (Vector3) {0.0f, 0.0f, 1.0f};
   camera.up = (Vector3) {0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
   camera.fovy = 70.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
@@ -135,11 +190,13 @@ int main() {
   city1->plots[1] = plot2;
   city1->plots[2] = plot3;
   Floor *floor1 = makeFloor(3, 2, 0, plot1);
-  Floor *floor2 = makeFloor(2, 1, 0, plot2);
-  Floor *floor2 = makeFloor(2, 1, 1, plot3);
+  Floor *floor2 = makeFloor(2, 1, 1, plot1);
+  Floor *floor3 = makeFloor(2, 1, 0, plot3);
+  FloorList *floorList = makeFloorList(3);
+  floorList->floors[0] = floor1;
+  floorList->floors[1] = floor2;
+  floorList->floors[2] = floor3;
   
-  Vector3 cubePosition = {0.0f, 0.0f, 0.0f};
-
   while (!WindowShouldClose()) {
     // resize window
     if (IsWindowResized()) {
@@ -153,14 +210,21 @@ int main() {
     BeginDrawing();
       ClearBackground(backgroundColor);
       BeginMode3D(camera);
-        DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-        DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
         DrawGrid(1000, 1.0f);
+        for (int i = 0; i < floorList->nbFloors; i++) {
+          drawFloor(floorList->floors[i]);
+        }
       EndMode3D();
     EndDrawing();
   }
   CloseWindow();
 
   // de-init
+  freeFloor(floor1);
+  freeFloor(floor2);
+  freeFloor(floor3);
+  freeCity(city1);
+  freeFloorList(floorList);
+
   return 0;
 }
