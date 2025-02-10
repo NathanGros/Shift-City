@@ -72,11 +72,49 @@ void freeCity(City *city) {
 }
 
 
+
 void Init(Color backgroundColor) {
   SetConfigFlags(FLAG_WINDOW_TOPMOST || FLAG_WINDOW_RESIZABLE);
   InitWindow(0, 0, "Shift City");
   ClearBackground(backgroundColor);
   SetTargetFPS(60);
+}
+
+City* buildWholeCity() {
+  Floor *floor1 = makeFloor(7, 6, 0);
+  Floor *floor2 = makeFloor(3, 2, 0);
+  Floor *floor3 = makeFloor(2, 1, 0);
+  Floor *floor4 = makeFloor(2, 1, 0);
+  Floor *floor5 = makeFloor(8, 7, 0);
+  Floor *floor6 = makeFloor(7, 6, 0);
+  Floor *floor7 = makeFloor(6, 5, 0);
+  Floor *floor8 = makeFloor(5, 4, 0);
+  Floor *floor9 = makeFloor(4, 3, 0);
+  Floor *floor10 = makeFloor(3, 2, 0);
+  Floor *floor11 = makeFloor(2, 1, 0);
+  Floor *floor12 = makeFloor(1, 0, 0);
+  Building *building1 = makeBuilding(0, 0, 3);
+  building1->floors[0] = floor1;
+  building1->floors[1] = floor2;
+  building1->floors[2] = floor3;
+  Building *building2 = makeBuilding(0, 1, 0);
+  Building *building3 = makeBuilding(0, 2, 1);
+  building3->floors[0] = floor4;
+  Building *building4 = makeBuilding(0, 3, 8);
+  building4->floors[0] = floor5;
+  building4->floors[1] = floor6;
+  building4->floors[2] = floor7;
+  building4->floors[3] = floor8;
+  building4->floors[4] = floor9;
+  building4->floors[5] = floor10;
+  building4->floors[6] = floor11;
+  building4->floors[7] = floor12;
+  City *city1 = makeCity(4);
+  city1->buildings[0] = building1;
+  city1->buildings[1] = building2;
+  city1->buildings[2] = building3;
+  city1->buildings[3] = building4;
+  return city1;
 }
 
 void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle, float *horizontalAngle, float *targetDistance) {
@@ -119,6 +157,18 @@ void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle,
   camera->position.z = camera->target.z + *targetDistance * sin(*horizontalAngle) * cos(*verticalAngle);
 }
 
+void printFloor(Floor *floor) {
+  printf("Floor : bottomSize %d, topSize %d, nbLinks %d\n", floor->bottomSize, floor->topSize, floor->nbLinks);
+}
+
+void printBuilding(Building *building) {
+  printf("Building : X %d, Y %d, nbFloors %d\n", building->positionX, building->positionY, building->nbFloors);
+  for (int i = 0; i < building->nbFloors; i++) {
+    printf("\t%d ", i);
+    printFloor(building->floors[i]);
+  }
+}
+
 void drawFloor(Floor *floor, int positionX, int positionY, int height) {
   int maxFloorSize = 8;
   float heightFactor = 0.2;
@@ -143,6 +193,71 @@ void drawCity(City *city) {
   }
 }
 
+Building* addFloor(Building *building, Floor *floor) {
+  int nbFloors = building->nbFloors;
+  Building *newBuilding = makeBuilding(building->positionX, building->positionY, nbFloors + 1);
+  for (int i = 0; i < nbFloors; i++) {
+    newBuilding->floors[i] = building->floors[i];
+  }
+  newBuilding->floors[nbFloors] = floor;
+  free(building->floors);
+  free(building);
+  return newBuilding;
+}
+
+Building* removeFloor(Building *building) {
+  int nbFloors = building->nbFloors;
+  Building *newBuilding = makeBuilding(building->positionX, building->positionY, nbFloors - 1);
+  for (int i = 0; i < nbFloors - 1; i++) {
+    newBuilding->floors[i] = building->floors[i];
+  }
+  free(building->floors);
+  free(building);
+  return newBuilding;
+}
+
+void moveFloor(Building **updatedBuildings, Building *buildingSrc, Building *buildingDst) {
+  Floor *storedFloor = buildingSrc->floors[buildingSrc->nbFloors - 1];
+  Building *newBuildingSrc = removeFloor(buildingSrc);
+  Building *newBuildingDst = addFloor(buildingDst, storedFloor);
+  updatedBuildings[0] = newBuildingSrc;
+  updatedBuildings[1] = newBuildingDst;
+}
+
+int findBuildingNb(City *city, int buildingX, int buildingY) {
+  for (int i = 0; i < city->nbBuildings; i++) {
+    Building *current = city->buildings[i];
+    if (current->positionX == buildingX && current->positionY == buildingY) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+Building* stashFloor(City *city, int buildingX, int buildingY, Building *stash) {
+  int buildingNb = findBuildingNb(city, buildingX, buildingY);
+  if (city->buildings[buildingNb]->nbFloors <= 0) {
+    printf("ERROR: No floor in specified building\n");
+    return stash;
+  }
+  Building **updatedBuildings = malloc(2 * sizeof(Building*));
+  moveFloor(updatedBuildings, city->buildings[buildingNb], stash);
+  city->buildings[buildingNb] = updatedBuildings[0];
+  return updatedBuildings[1];
+}
+
+Building* dropFloor(City *city, int buildingX, int buildingY, Building *stash) {
+  int buildingNb = findBuildingNb(city, buildingX, buildingY);
+  if (stash->nbFloors <= 0) {
+    printf("ERROR: No floor stashed\n");
+    return stash;
+  }
+  Building **updatedBuildings = malloc(2 * sizeof(Building*));
+  moveFloor(updatedBuildings, stash, city->buildings[buildingNb]);
+  city->buildings[buildingNb] = updatedBuildings[1];
+  return updatedBuildings[0];
+}
+
 
 
 int main() {
@@ -150,7 +265,6 @@ int main() {
   Color backgroundColor = (Color) {200, 200, 200, 255};
   Init(backgroundColor);
   ToggleFullscreen();
-  DisableCursor();
   int screenWidth = GetScreenWidth();
   int screenHeight = GetScreenHeight();
 
@@ -167,40 +281,12 @@ int main() {
   camera.fovy = 70.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
 
-  // making the city
-  Floor *floor1 = makeFloor(7, 6, 0);
-  Floor *floor2 = makeFloor(3, 2, 0);
-  Floor *floor3 = makeFloor(2, 1, 0);
-  Floor *floor4 = makeFloor(2, 1, 0);
-  Floor *floor5 = makeFloor(8, 7, 0);
-  Floor *floor6 = makeFloor(7, 6, 0);
-  Floor *floor7 = makeFloor(6, 5, 0);
-  Floor *floor8 = makeFloor(5, 4, 0);
-  Floor *floor9 = makeFloor(4, 3, 0);
-  Floor *floor10 = makeFloor(3, 2, 0);
-  Floor *floor11 = makeFloor(2, 1, 0);
-  Floor *floor12 = makeFloor(1, 0, 0);
-  Building *building1 = makeBuilding(0, 0, 3);
-  building1->floors[0] = floor1;
-  building1->floors[1] = floor2;
-  building1->floors[2] = floor3;
-  Building *building2 = makeBuilding(0, 1, 0);
-  Building *building3 = makeBuilding(0, 2, 1);
-  building3->floors[0] = floor4;
-  Building *building4 = makeBuilding(0, 3, 8);
-  building4->floors[0] = floor5;
-  building4->floors[1] = floor6;
-  building4->floors[2] = floor7;
-  building4->floors[3] = floor8;
-  building4->floors[4] = floor9;
-  building4->floors[5] = floor10;
-  building4->floors[6] = floor11;
-  building4->floors[7] = floor12;
-  City *city1 = makeCity(4);
-  city1->buildings[0] = building1;
-  city1->buildings[1] = building2;
-  city1->buildings[2] = building3;
-  city1->buildings[3] = building4;
+  // initialize space
+  Building *stash = makeBuilding(0, 0, 0);
+  City *city1 = buildWholeCity();
+
+  stash = stashFloor(city1, 0, 0, stash);
+  stash = dropFloor(city1, 0, 1, stash);
   
   while (!WindowShouldClose()) {
     // resize window
@@ -223,6 +309,7 @@ int main() {
 
   // de-init
   freeCity(city1);
+  freeBuilding(stash);
 
   return 0;
 }
