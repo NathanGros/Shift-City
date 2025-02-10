@@ -5,100 +5,71 @@
 
 
 
-typedef struct {
-  int x; // position x
-  int y; // position y
-} Plot;
+struct Floor {
+  int bottomSize;
+  int topSize;
+  int nbLinks;
+  struct Floor **links; // pointer to a list of other floors' pointers (the grouped floors)
+};
+typedef struct Floor Floor;
 
-Plot* makePlot(int x, int y) {
-  Plot *plot = malloc(sizeof(Plot));
-  plot->x = x;
-  plot->y = y;
-  return plot;
-}
-
-void freePlot(Plot *plot) {
-  free(plot);
-}
-
-typedef struct {
-  int nbPlots;
-  Plot **plots; // list of plot pointers
-} City;
-
-City* makeCity(int nbPlots) {
-  City *city = malloc(sizeof(City));
-  city->nbPlots = nbPlots;
-  city->plots = malloc(nbPlots * sizeof(Plot*));
-  return city;
-}
-
-void freeCity(City *city) {
-  for (int i = 0; i < city->nbPlots; i++) {
-    freePlot(city->plots[i]);
-  }
-  free(city);
-}
-
-typedef struct {
-  int bottomSize; // floor bottom size
-  int topSize; // floor top size
-  int height; // floor height compared to ground level
-  Plot *plot; // the plot on which the floor is built
-} Floor;
-
-Floor* makeFloor(int bottomSize, int topSize, int height, Plot *plot) {
+Floor* makeFloor(int bottomSize, int topSize, int nbLinks) {
   Floor *floor = malloc(sizeof(Floor));
   floor->bottomSize = bottomSize;
   floor->topSize = topSize;
-  floor->height = height;
-  floor->plot = plot;
+  floor->nbLinks = nbLinks;
+  floor->links = malloc(nbLinks * sizeof(Floor*));
   return floor;
 }
 
 void freeFloor(Floor *floor) {
-  freePlot(floor->plot);
+  free(floor->links);
   free(floor);
 }
 
 typedef struct {
+  int positionX;
+  int positionY;
   int nbFloors;
-  Floor **floors; // list of floor pointers
-} FloorGroup;
+  Floor **floors; // pointer to a list of floor pointers (the stacked floors in order)
+} Building;
 
-FloorGroup* makeFloorGroup(int nbFloors) {
-  FloorGroup *floorGroup = malloc(sizeof(FloorGroup));
-  floorGroup->nbFloors = nbFloors;
-  floorGroup->floors = malloc(nbFloors * sizeof(Floor*));
-  return floorGroup;
+Building* makeBuilding(int positionX, int positionY, int nbFloors) {
+  Building *building = malloc(sizeof(Building));
+  building->positionX = positionX;
+  building->positionY = positionY;
+  building->nbFloors = nbFloors;
+  building->floors = malloc(nbFloors * sizeof(Floor*));
+  return building;
 }
 
-void freeFloorGroup(FloorGroup *floorGroup) {
-  for (int i = 0; i < floorGroup->nbFloors; i++) {
-    freeFloor(floorGroup->floors[i]);
+void freeBuilding(Building *building) {
+  for (int i = 0; i < building->nbFloors; i++) {
+    freeFloor(building->floors[i]);
   }
-  free(floorGroup);
+  free(building->floors);
+  free(building);
 }
 
 typedef struct {
-  int nbFloors;
-  Floor **floors; // list of floor pointers
-} FloorList;
+  int nbBuildings;
+  Building **buildings;
+} City;
 
-FloorList* makeFloorList(int nbFloors) {
-  FloorList *floorList = malloc(sizeof(FloorList));
-  floorList->nbFloors = nbFloors;
-  floorList->floors = malloc(nbFloors * sizeof(Floor*));
-  return floorList;
+City* makeCity(int nbBuildings) {
+  City *city = malloc(sizeof(City));
+  city->nbBuildings = nbBuildings;
+  city->buildings = malloc(nbBuildings * sizeof(Building*));
+  return city;
 }
 
-void freeFloorList(FloorList *floorList) {
-  for (int i = 0; i < floorList->nbFloors; i++) {
-    freeFloor(floorList->floors[i]);
+void freeCity(City *city) {
+  for (int i = 0; i < city->nbBuildings; i++) {
+    freeBuilding(city->buildings[i]);
   }
-  free(floorList);
+  free(city->buildings);
+  free(city);
 }
-
 
 
 void Init(Color backgroundColor) {
@@ -148,25 +119,27 @@ void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle,
   camera->position.z = camera->target.z + *targetDistance * sin(*horizontalAngle) * cos(*verticalAngle);
 }
 
-void drawFloor(Floor *floor) {
+void drawFloor(Floor *floor, int positionX, int positionY, int height) {
   int maxFloorSize = 8;
-  float height = 0.2;
-  Plot *plot = floor->plot;
-  Vector3 position = (Vector3) {plot->x, height * floor->height, plot->y};
+  float heightFactor = 0.2;
+  Vector3 position = (Vector3) {positionX, heightFactor * height, positionY};
   float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
-  DrawCylinder(position, radius, radius, height, 4, BLUE);
-  DrawCylinderWires(position, radius, radius, height, 4, WHITE);
+  DrawCylinder(position, radius, radius, heightFactor, 4, BLUE);
+  DrawCylinderWires(position, radius, radius, heightFactor, 4, WHITE);
 }
 
-void drawPlot(Plot *plot) {
-  Vector3 position = (Vector3) {plot->x, -0.5, plot->y};
-  DrawCube(position, 1., 1., 1., GRAY);
-  DrawCubeWires(position, 1., 1., 1., BLACK);
+void drawBuilding(Building *building) {
+  Vector3 supportPosition = (Vector3) {building->positionX, -0.5, building->positionY};
+  DrawCube(supportPosition, 1., 1., 1., GRAY);
+  DrawCubeWires(supportPosition, 1., 1., 1., BLACK);
+  for (int i = 0; i < building->nbFloors; i++) {
+    drawFloor(building->floors[i], building->positionX, building->positionY, i);
+  }
 }
 
 void drawCity(City *city) {
-  for (int i = 0; i < city->nbPlots; i++) {
-    drawPlot(city->plots[i]);
+  for (int i = 0; i < city->nbBuildings; i++) {
+    drawBuilding(city->buildings[i]);
   }
 }
 
@@ -195,40 +168,39 @@ int main() {
   camera.projection = CAMERA_PERSPECTIVE;
 
   // making the city
-  Plot *plot1 = makePlot(0, 0);
-  Plot *plot2 = makePlot(0, 1);
-  Plot *plot3 = makePlot(0, 2);
-  Plot *plot4 = makePlot(0, 3);
+  Floor *floor1 = makeFloor(7, 6, 0);
+  Floor *floor2 = makeFloor(3, 2, 0);
+  Floor *floor3 = makeFloor(2, 1, 0);
+  Floor *floor4 = makeFloor(2, 1, 0);
+  Floor *floor5 = makeFloor(8, 7, 0);
+  Floor *floor6 = makeFloor(7, 6, 0);
+  Floor *floor7 = makeFloor(6, 5, 0);
+  Floor *floor8 = makeFloor(5, 4, 0);
+  Floor *floor9 = makeFloor(4, 3, 0);
+  Floor *floor10 = makeFloor(3, 2, 0);
+  Floor *floor11 = makeFloor(2, 1, 0);
+  Floor *floor12 = makeFloor(1, 0, 0);
+  Building *building1 = makeBuilding(0, 0, 3);
+  building1->floors[0] = floor1;
+  building1->floors[1] = floor2;
+  building1->floors[2] = floor3;
+  Building *building2 = makeBuilding(0, 1, 0);
+  Building *building3 = makeBuilding(0, 2, 1);
+  building3->floors[0] = floor4;
+  Building *building4 = makeBuilding(0, 3, 8);
+  building4->floors[0] = floor5;
+  building4->floors[1] = floor6;
+  building4->floors[2] = floor7;
+  building4->floors[3] = floor8;
+  building4->floors[4] = floor9;
+  building4->floors[5] = floor10;
+  building4->floors[6] = floor11;
+  building4->floors[7] = floor12;
   City *city1 = makeCity(4);
-  city1->plots[0] = plot1;
-  city1->plots[1] = plot2;
-  city1->plots[2] = plot3;
-  city1->plots[3] = plot4;
-  Floor *floor1 = makeFloor(7, 6, 0, plot1);
-  Floor *floor2 = makeFloor(3, 2, 1, plot1);
-  Floor *floor3 = makeFloor(2, 1, 2, plot1);
-  Floor *floor4 = makeFloor(2, 1, 0, plot3);
-  Floor *floor5 = makeFloor(8, 7, 0, plot4);
-  Floor *floor6 = makeFloor(7, 6, 1, plot4);
-  Floor *floor7 = makeFloor(6, 5, 2, plot4);
-  Floor *floor8 = makeFloor(5, 4, 3, plot4);
-  Floor *floor9 = makeFloor(4, 3, 4, plot4);
-  Floor *floor10 = makeFloor(3, 2, 5, plot4);
-  Floor *floor11 = makeFloor(2, 1, 6, plot4);
-  Floor *floor12 = makeFloor(1, 0, 7, plot4);
-  FloorList *floorList = makeFloorList(12);
-  floorList->floors[0] = floor1;
-  floorList->floors[1] = floor2;
-  floorList->floors[2] = floor3;
-  floorList->floors[3] = floor4;
-  floorList->floors[4] = floor5;
-  floorList->floors[5] = floor6;
-  floorList->floors[6] = floor7;
-  floorList->floors[7] = floor8;
-  floorList->floors[8] = floor9;
-  floorList->floors[9] = floor10;
-  floorList->floors[10] = floor11;
-  floorList->floors[11] = floor12;
+  city1->buildings[0] = building1;
+  city1->buildings[1] = building2;
+  city1->buildings[2] = building3;
+  city1->buildings[3] = building4;
   
   while (!WindowShouldClose()) {
     // resize window
@@ -244,9 +216,6 @@ int main() {
       ClearBackground(backgroundColor);
       BeginMode3D(camera);
         drawCity(city1);
-        for (int i = 0; i < floorList->nbFloors; i++) {
-          drawFloor(floorList->floors[i]);
-        }
       EndMode3D();
     EndDrawing();
   }
@@ -254,7 +223,6 @@ int main() {
 
   // de-init
   freeCity(city1);
-  freeFloorList(floorList);
 
   return 0;
 }
