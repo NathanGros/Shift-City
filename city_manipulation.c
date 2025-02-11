@@ -30,7 +30,7 @@ City* buildWholeCity() {
 
 Building* addFloor(Building *building, Floor *floor) {
   int nbFloors = building->nbFloors;
-  Building *newBuilding = makeBuilding(building->positionX, building->positionY, nbFloors + 1);
+  Building *newBuilding = makeBuilding(building->positionX, building->positionZ, nbFloors + 1);
   for (int i = 0; i < nbFloors; i++) {
     newBuilding->floors[i] = building->floors[i];
   }
@@ -42,7 +42,7 @@ Building* addFloor(Building *building, Floor *floor) {
 
 Building* removeFloor(Building *building) {
   int nbFloors = building->nbFloors;
-  Building *newBuilding = makeBuilding(building->positionX, building->positionY, nbFloors - 1);
+  Building *newBuilding = makeBuilding(building->positionX, building->positionZ, nbFloors - 1);
   for (int i = 0; i < nbFloors - 1; i++) {
     newBuilding->floors[i] = building->floors[i];
   }
@@ -59,22 +59,22 @@ void moveFloor(Building **updatedBuildings, Building *buildingSrc, Building *bui
   updatedBuildings[1] = newBuildingDst;
 }
 
-int findBuildingNb(City *city, int buildingX, int buildingY) {
+int findBuildingNb(City *city, int buildingX, int buildingZ) {
   for (int i = 0; i < city->nbBuildings; i++) {
     Building *current = city->buildings[i];
-    if (current->positionX == buildingX && current->positionY == buildingY) {
+    if (current->positionX == buildingX && current->positionZ == buildingZ) {
       return i;
     }
   }
   return -1;
 }
 
-Building* stashFloor(City *city, int buildingX, int buildingY, Building *stash, int maxStashSize) {
+Building* stashFloor(City *city, int buildingX, int buildingZ, Building *stash, int maxStashSize) {
   if (stash->nbFloors >= maxStashSize) {
     printf("ERROR: Can't stash more floors\n");
     return stash;
   }
-  int buildingNb = findBuildingNb(city, buildingX, buildingY);
+  int buildingNb = findBuildingNb(city, buildingX, buildingZ);
   if (city->buildings[buildingNb]->nbFloors <= 0) {
     printf("ERROR: No floor in specified building\n");
     return stash;
@@ -85,8 +85,8 @@ Building* stashFloor(City *city, int buildingX, int buildingY, Building *stash, 
   return updatedBuildings[1];
 }
 
-Building* dropFloor(City *city, int buildingX, int buildingY, Building *stash) {
-  int buildingNb = findBuildingNb(city, buildingX, buildingY);
+Building* dropFloor(City *city, int buildingX, int buildingZ, Building *stash) {
+  int buildingNb = findBuildingNb(city, buildingX, buildingZ);
   if (stash->nbFloors <= 0) {
     printf("ERROR: No floor stashed\n");
     return stash;

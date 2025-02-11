@@ -42,20 +42,20 @@ void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle,
   camera->position.z = camera->target.z + *targetDistance * sin(*horizontalAngle) * cos(*verticalAngle);
 }
 
-void updateCursorBuildingCoordinates(Camera camera, City *city, int *cursorBuildingX, int *cursorBuildingY) {
+void updateCursorBuildingCoordinates(Camera camera, City *city, int *cursorTileX, int *cursorTileZ) {
   for (int i = 0; i < city->nbBuildings; i++) {
     Building *current = city->buildings[i];
     int bX = current->positionX;
-    int bY = current->positionY;
+    int bZ = current->positionZ;
     Vector2 vertexArray[4] = {
-      GetWorldToScreen((Vector3) {(float) bX, 0.0f, (float) bY}, camera),
-      GetWorldToScreen((Vector3) {(float) bX+1, 0.0f, (float) bY}, camera),
-      GetWorldToScreen((Vector3) {(float) bX+1, 0.0f, (float) bY+1}, camera),
-      GetWorldToScreen((Vector3) {(float) bX, 0.0f, (float) bY+1}, camera)
+      GetWorldToScreen((Vector3) {(float) bX, 0.0f, (float) bZ}, camera),
+      GetWorldToScreen((Vector3) {(float) bX+1, 0.0f, (float) bZ}, camera),
+      GetWorldToScreen((Vector3) {(float) bX+1, 0.0f, (float) bZ+1}, camera),
+      GetWorldToScreen((Vector3) {(float) bX, 0.0f, (float) bZ+1}, camera)
     };
     if (CheckCollisionPointPoly(GetMousePosition(), vertexArray, 4)) {
-      *cursorBuildingX = bX;
-      *cursorBuildingY = bY;
+      *cursorTileX = bX;
+      *cursorTileZ = bZ;
       break;
     }
   }

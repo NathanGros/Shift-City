@@ -15,12 +15,12 @@ void freeFloor(Floor *floor);
 
 typedef struct {
     int positionX;
-    int positionY;
+    int positionZ;
     int nbFloors;
     Floor **floors; // pointer to a list of floor pointers
 } Building;
 
-Building* makeBuilding(int positionX, int positionY, int nbFloors);
+Building* makeBuilding(int positionX, int positionZ, int nbFloors);
 void freeBuilding(Building *building);
 
 typedef struct {

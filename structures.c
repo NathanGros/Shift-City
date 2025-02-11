@@ -15,10 +15,10 @@ void freeFloor(Floor *floor) {
     free(floor);
 }
 
-Building* makeBuilding(int positionX, int positionY, int nbFloors) {
+Building* makeBuilding(int positionX, int positionZ, int nbFloors) {
     Building *building = malloc(sizeof(Building));
     building->positionX = positionX;
-    building->positionY = positionY;
+    building->positionZ = positionZ;
     building->nbFloors = nbFloors;
     building->floors = malloc(nbFloors * sizeof(Floor*));
     return building;

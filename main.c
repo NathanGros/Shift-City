@@ -22,7 +22,7 @@ void printFloor(Floor *floor) {
 }
 
 void printBuilding(Building *building) {
-  printf("Building : X %d, Y %d, nbFloors %d\n", building->positionX, building->positionY, building->nbFloors);
+  printf("Building : X %d, Z %d, nbFloors %d\n", building->positionX, building->positionZ, building->nbFloors);
   for (int i = 0; i < building->nbFloors; i++) {
     printf("\t%d ", i);
     printFloor(building->floors[i]);
@@ -51,8 +51,8 @@ int main() {
   camera.projection = CAMERA_PERSPECTIVE;
 
   // cursor control
-  int cursorBuildingX = 0;
-  int cursorBuildingY = 0;
+  int cursorTileX = 0;
+  int cursorTileZ = 0;
 
   // initialize space
   Building *stash = makeBuilding(0, 0, 0);
@@ -61,13 +61,13 @@ int main() {
   
   while (!WindowShouldClose()) {
     updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
-    updateCursorBuildingCoordinates(camera, city1, &cursorBuildingX, &cursorBuildingY);
+    updateCursorBuildingCoordinates(camera, city1, &cursorTileX, &cursorTileZ);
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-      stash = stashFloor(city1, cursorBuildingX, cursorBuildingY, stash, maxStashSize);
+      stash = stashFloor(city1, cursorTileX, cursorTileZ, stash, maxStashSize);
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-      stash = dropFloor(city1, cursorBuildingX, cursorBuildingY, stash);
+      stash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
     }
 
     // drawing
@@ -75,8 +75,8 @@ int main() {
       ClearBackground(backgroundColor);
       BeginMode3D(camera);
         drawCity(city1);
-        drawSelectedTile(cursorBuildingX, cursorBuildingY);
-        drawStash(stash, cursorBuildingX, cursorBuildingY);
+        drawSelectedTile(cursorTileX, cursorTileZ);
+        drawStash(stash, cursorTileX, cursorTileZ);
       EndMode3D();
     EndDrawing();
   }

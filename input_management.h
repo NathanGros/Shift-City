@@ -5,6 +5,6 @@
 #include "structures.h"
 
 void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle, float *horizontalAngle, float *targetDistance);
-void updateCursorBuildingCoordinates(Camera camera, City *city, int *cursorBuildingX, int *cursorBuildingY);
+void updateCursorBuildingCoordinates(Camera camera, City *city, int *cursorTileX, int *cursorTileZ);
 
 #endif
