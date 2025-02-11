@@ -9,5 +9,6 @@ void drawBuilding(Building *building);
 void drawStash(Building *stash, int tileX, int tileZ);
 void drawCity(City *city);
 void drawSelectedTile(int tileX, int tileZ);
+void drawPoints(int points);
 
 #endif

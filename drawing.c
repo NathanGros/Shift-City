@@ -34,3 +34,20 @@ void drawCity(City *city) {
 void drawSelectedTile(int tileX, int tileZ) {
     DrawPlane((Vector3) {tileX + 0.5f, 0.001f, tileZ + 0.5f}, (Vector2) {1.0f, 1.0f}, DARKGRAY); 
 }
+
+void drawPoints(int points) {
+  int characterX = GetScreenWidth() - 30;
+  if (points <= 0) {
+    DrawText("0", characterX, 20, 20, BLACK);
+  }
+  else {
+    while (points > 0) {
+      int lastDigit = points % 10;
+      char stringDigit[1];
+      stringDigit[0] = (char) (lastDigit + (int) '0');
+      DrawText(stringDigit, characterX, 20, 20, BLACK);
+      characterX -= 15;
+      points = (points - lastDigit) / 10;
+    }
+  }
+}

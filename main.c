@@ -17,17 +17,17 @@ void Init(Color backgroundColor) {
   SetTargetFPS(60);
 }
 
-void printFloor(Floor *floor) {
-  printf("Floor : bottomSize %d, topSize %d, nbLinks %d\n", floor->bottomSize, floor->topSize, floor->nbLinks);
-}
+/*void printFloor(Floor *floor) {*/
+/*  printf("Floor : bottomSize %d, topSize %d, nbLinks %d\n", floor->bottomSize, floor->topSize, floor->nbLinks);*/
+/*}*/
 
-void printBuilding(Building *building) {
-  printf("Building : X %d, Z %d, nbFloors %d\n", building->positionX, building->positionZ, building->nbFloors);
-  for (int i = 0; i < building->nbFloors; i++) {
-    printf("\t%d ", i);
-    printFloor(building->floors[i]);
-  }
-}
+/*void printBuilding(Building *building) {*/
+/*  printf("Building : X %d, Z %d, nbFloors %d\n", building->positionX, building->positionZ, building->nbFloors);*/
+/*  for (int i = 0; i < building->nbFloors; i++) {*/
+/*    printf("\t%d ", i);*/
+/*    printFloor(building->floors[i]);*/
+/*  }*/
+/*}*/
 
 
 
@@ -49,6 +49,9 @@ int main() {
   camera.up = (Vector3) {0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
   camera.fovy = 70.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
+
+  // score
+  int points = 0;
 
   // cursor control
   int cursorTileX = 0;
@@ -78,6 +81,7 @@ int main() {
         drawSelectedTile(cursorTileX, cursorTileZ);
         drawStash(stash, cursorTileX, cursorTileZ);
       EndMode3D();
+      drawPoints(points);
     EndDrawing();
   }
   CloseWindow();
