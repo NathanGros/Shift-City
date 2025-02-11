@@ -305,10 +305,6 @@ int main() {
   // initialize space
   Building *stash = makeBuilding(0, 0, 0);
   City *city1 = buildWholeCity();
-
-  stash = dropFloor(city1, 0, 3, stash);
-  stash = stashFloor(city1, 0, 0, stash);
-  stash = dropFloor(city1, 0, 3, stash);
   
   while (!WindowShouldClose()) {
     updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
