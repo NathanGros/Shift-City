@@ -81,39 +81,29 @@ void Init(Color backgroundColor) {
 }
 
 City* buildWholeCity() {
-  Floor *floor1 = makeFloor(7, 6, 0);
-  Floor *floor2 = makeFloor(3, 2, 0);
-  Floor *floor3 = makeFloor(2, 1, 0);
-  Floor *floor4 = makeFloor(2, 1, 0);
-  Floor *floor5 = makeFloor(8, 7, 0);
-  Floor *floor6 = makeFloor(7, 6, 0);
-  Floor *floor7 = makeFloor(6, 5, 0);
-  Floor *floor8 = makeFloor(5, 4, 0);
-  Floor *floor9 = makeFloor(4, 3, 0);
-  Floor *floor10 = makeFloor(3, 2, 0);
-  Floor *floor11 = makeFloor(2, 1, 0);
-  Floor *floor12 = makeFloor(1, 0, 0);
-  Building *building1 = makeBuilding(0, 0, 3);
+  Floor *floor1 = makeFloor(8, 7, 0);
+  Floor *floor2 = makeFloor(7, 6, 0);
+  Floor *floor3 = makeFloor(6, 5, 0);
+  Floor *floor4 = makeFloor(5, 4, 0);
+  Floor *floor5 = makeFloor(4, 3, 0);
+  Floor *floor6 = makeFloor(3, 2, 0);
+  Floor *floor7 = makeFloor(2, 1, 0);
+  Floor *floor8 = makeFloor(1, 0, 0);
+  Building *building1 = makeBuilding(0, 0, 8);
+  Building *building2 = makeBuilding(0, 1, 0);
+  Building *building3 = makeBuilding(0, 2, 0);
   building1->floors[0] = floor1;
   building1->floors[1] = floor2;
   building1->floors[2] = floor3;
-  Building *building2 = makeBuilding(0, 1, 0);
-  Building *building3 = makeBuilding(0, 2, 1);
-  building3->floors[0] = floor4;
-  Building *building4 = makeBuilding(0, 3, 8);
-  building4->floors[0] = floor5;
-  building4->floors[1] = floor6;
-  building4->floors[2] = floor7;
-  building4->floors[3] = floor8;
-  building4->floors[4] = floor9;
-  building4->floors[5] = floor10;
-  building4->floors[6] = floor11;
-  building4->floors[7] = floor12;
-  City *city1 = makeCity(4);
+  building1->floors[3] = floor4;
+  building1->floors[4] = floor5;
+  building1->floors[5] = floor6;
+  building1->floors[6] = floor7;
+  building1->floors[7] = floor8;
+  City *city1 = makeCity(3);
   city1->buildings[0] = building1;
   city1->buildings[1] = building2;
   city1->buildings[2] = building3;
-  city1->buildings[3] = building4;
   return city1;
 }
 
@@ -147,7 +137,7 @@ void updateCamera(Camera3D *camera, float pi, float speed, float *verticalAngle,
   }
 
   // camera zoom
-  *targetDistance *= 1. - 0.3 * GetMouseWheelMove();
+  *targetDistance *= 1. - 0.2 * GetMouseWheelMove();
   if (*targetDistance <= 2.) *targetDistance = 2.;
   if (*targetDistance >= 30.) *targetDistance = 30.;
 
@@ -250,6 +240,12 @@ Building* dropFloor(City *city, int buildingX, int buildingY, Building *stash) {
   int buildingNb = findBuildingNb(city, buildingX, buildingY);
   if (stash->nbFloors <= 0) {
     printf("ERROR: No floor stashed\n");
+    return stash;
+  }
+  Building *foundBuilding = city->buildings[buildingNb];
+  if (foundBuilding->nbFloors != 0 &&
+      (stash->floors[stash->nbFloors - 1]->bottomSize > foundBuilding->floors[foundBuilding->nbFloors - 1]->topSize)) {
+    printf("ERROR: Floor is too big to be placed there\n");
     return stash;
   }
   Building **updatedBuildings = malloc(2 * sizeof(Building*));
