@@ -87,6 +87,7 @@ int main() {
         drawCity(city1);
         drawSelectedTile(cursorTileX, cursorTileZ);
         drawStash(stash, cursorTileX, cursorTileZ);
+        drawObjective(objective);
       EndMode3D();
       drawPoints(points);
     EndDrawing();
