@@ -3,73 +3,8 @@
 #include <math.h>
 #include <raylib.h>
 
-
-
-struct Floor {
-  int bottomSize;
-  int topSize;
-  int nbLinks;
-  struct Floor **links; // pointer to a list of other floors' pointers (the grouped floors)
-};
-typedef struct Floor Floor;
-
-Floor* makeFloor(int bottomSize, int topSize, int nbLinks) {
-  Floor *floor = malloc(sizeof(Floor));
-  floor->bottomSize = bottomSize;
-  floor->topSize = topSize;
-  floor->nbLinks = nbLinks;
-  floor->links = malloc(nbLinks * sizeof(Floor*));
-  return floor;
-}
-
-void freeFloor(Floor *floor) {
-  free(floor->links);
-  free(floor);
-}
-
-typedef struct {
-  int positionX;
-  int positionY;
-  int nbFloors;
-  Floor **floors; // pointer to a list of floor pointers (the stacked floors in order)
-} Building;
-
-Building* makeBuilding(int positionX, int positionY, int nbFloors) {
-  Building *building = malloc(sizeof(Building));
-  building->positionX = positionX;
-  building->positionY = positionY;
-  building->nbFloors = nbFloors;
-  building->floors = malloc(nbFloors * sizeof(Floor*));
-  return building;
-}
-
-void freeBuilding(Building *building) {
-  for (int i = 0; i < building->nbFloors; i++) {
-    freeFloor(building->floors[i]);
-  }
-  free(building->floors);
-  free(building);
-}
-
-typedef struct {
-  int nbBuildings;
-  Building **buildings;
-} City;
-
-City* makeCity(int nbBuildings) {
-  City *city = malloc(sizeof(City));
-  city->nbBuildings = nbBuildings;
-  city->buildings = malloc(nbBuildings * sizeof(Building*));
-  return city;
-}
-
-void freeCity(City *city) {
-  for (int i = 0; i < city->nbBuildings; i++) {
-    freeBuilding(city->buildings[i]);
-  }
-  free(city->buildings);
-  free(city);
-}
+#include "structures.h"
+#include "drawing.h"
 
 
 
@@ -157,40 +92,6 @@ void printBuilding(Building *building) {
     printf("\t%d ", i);
     printFloor(building->floors[i]);
   }
-}
-
-void drawFloor(Floor *floor, int positionX, float altitude, int positionY, int height) {
-  int maxFloorSize = 8;
-  float heightFactor = 0.2;
-  Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height + altitude, positionY + 0.5f};
-  float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
-  DrawCylinder(position, radius, radius, heightFactor, 4, BLUE);
-  DrawCylinderWires(position, radius, radius, heightFactor, 4, WHITE);
-}
-
-void drawBuilding(Building *building) {
-  Vector3 supportPosition = (Vector3) {building->positionX + 0.5f, -0.5f, building->positionY + 0.5f};
-  DrawCube(supportPosition, 1., 1., 1., GRAY);
-  DrawCubeWires(supportPosition, 1., 1., 1., BLACK);
-  for (int i = 0; i < building->nbFloors; i++) {
-    drawFloor(building->floors[i], building->positionX, 0.0f, building->positionY, i);
-  }
-}
-
-void drawStash(Building *stash, int tileX, int tileY) {
-  for (int i = 0; i < stash->nbFloors; i++) {
-    drawFloor(stash->floors[i], tileX, 2.0f, tileY, i);
-  }
-}
-
-void drawCity(City *city) {
-  for (int i = 0; i < city->nbBuildings; i++) {
-    drawBuilding(city->buildings[i]);
-  }
-}
-
-void drawSelectedTile(int tileX, int tileY) {
-  DrawPlane((Vector3) {tileX + 0.5f, 0.001f, tileY + 0.5f}, (Vector2) {1.0f, 1.0f}, DARKGRAY); 
 }
 
 Building* addFloor(Building *building, Floor *floor) {

@@ -1,3 +1,3 @@
 make :
-	gcc main.c -o main.exe -Wall -lraylib -lm
+	gcc main.c structures.c drawing.c -o main.exe -Wall -lraylib -lm
 	./main.exe
