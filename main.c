@@ -159,10 +159,10 @@ void printBuilding(Building *building) {
   }
 }
 
-void drawFloor(Floor *floor, int positionX, int positionY, int height) {
+void drawFloor(Floor *floor, int positionX, float altitude, int positionY, int height) {
   int maxFloorSize = 8;
   float heightFactor = 0.2;
-  Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height, positionY + 0.5f};
+  Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height + altitude, positionY + 0.5f};
   float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
   DrawCylinder(position, radius, radius, heightFactor, 4, BLUE);
   DrawCylinderWires(position, radius, radius, heightFactor, 4, WHITE);
@@ -173,7 +173,13 @@ void drawBuilding(Building *building) {
   DrawCube(supportPosition, 1., 1., 1., GRAY);
   DrawCubeWires(supportPosition, 1., 1., 1., BLACK);
   for (int i = 0; i < building->nbFloors; i++) {
-    drawFloor(building->floors[i], building->positionX, building->positionY, i);
+    drawFloor(building->floors[i], building->positionX, 0.0f, building->positionY, i);
+  }
+}
+
+void drawStash(Building *stash, int tileX, int tileY) {
+  for (int i = 0; i < stash->nbFloors; i++) {
+    drawFloor(stash->floors[i], tileX, 2.0f, tileY, i);
   }
 }
 
@@ -181,6 +187,10 @@ void drawCity(City *city) {
   for (int i = 0; i < city->nbBuildings; i++) {
     drawBuilding(city->buildings[i]);
   }
+}
+
+void drawSelectedTile(int tileX, int tileY) {
+  DrawPlane((Vector3) {tileX + 0.5f, 0.001f, tileY + 0.5f}, (Vector2) {1.0f, 1.0f}, DARKGRAY); 
 }
 
 Building* addFloor(Building *building, Floor *floor) {
@@ -224,7 +234,11 @@ int findBuildingNb(City *city, int buildingX, int buildingY) {
   return -1;
 }
 
-Building* stashFloor(City *city, int buildingX, int buildingY, Building *stash) {
+Building* stashFloor(City *city, int buildingX, int buildingY, Building *stash, int maxStashSize) {
+  if (stash->nbFloors >= maxStashSize) {
+    printf("ERROR: Can't stash more floors\n");
+    return stash;
+  }
   int buildingNb = findBuildingNb(city, buildingX, buildingY);
   if (city->buildings[buildingNb]->nbFloors <= 0) {
     printf("ERROR: No floor in specified building\n");
@@ -301,13 +315,14 @@ int main() {
   // initialize space
   Building *stash = makeBuilding(0, 0, 0);
   City *city1 = buildWholeCity();
+  int maxStashSize = 1;
   
   while (!WindowShouldClose()) {
     updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
     updateCursorBuildingCoordinates(camera, city1, &cursorBuildingX, &cursorBuildingY);
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-      stash = stashFloor(city1, cursorBuildingX, cursorBuildingY, stash);
+      stash = stashFloor(city1, cursorBuildingX, cursorBuildingY, stash, maxStashSize);
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
       stash = dropFloor(city1, cursorBuildingX, cursorBuildingY, stash);
@@ -318,7 +333,8 @@ int main() {
       ClearBackground(backgroundColor);
       BeginMode3D(camera);
         drawCity(city1);
-        DrawPlane((Vector3) {cursorBuildingX + 0.5f, 0.001f, cursorBuildingY + 0.5f}, (Vector2) {1.0f, 1.0f}, DARKGRAY); 
+        drawSelectedTile(cursorBuildingX, cursorBuildingY);
+        drawStash(stash, cursorBuildingX, cursorBuildingY);
       EndMode3D();
     EndDrawing();
   }
