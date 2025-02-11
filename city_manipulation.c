@@ -102,3 +102,18 @@ Building* dropFloor(City *city, int buildingX, int buildingZ, Building *stash) {
   city->buildings[buildingNb] = updatedBuildings[1];
   return updatedBuildings[0];
 }
+
+int compareFloor(Floor *floor1, Floor *floor2) { //TODO when adding shared floors
+  if (floor1->bottomSize == floor2->bottomSize
+      && floor1->topSize == floor2->topSize
+      && floor1->nbLinks == floor2->nbLinks) return 1;
+  return 0;
+}
+
+int compareBuilding(Building *building1, Building *building2) {
+  if (building1->nbFloors != building2->nbFloors) return 0;
+  for (int i = 0; i < building1->nbFloors; i++) {
+    if (compareFloor(building1->floors[i], building2->floors[i]) == 0) return 0;
+  }
+  return 1;
+}

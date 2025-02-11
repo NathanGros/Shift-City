@@ -50,8 +50,13 @@ int main() {
   camera.fovy = 70.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
 
-  // score
+  // score related
   int points = 0;
+  Building *objective = makeBuilding(0, 0, 2);
+  Floor *objectiveFloor1 = makeFloor(2, 1, 0);
+  Floor *objectiveFloor2 = makeFloor(1, 0, 0);
+  objective->floors[0] = objectiveFloor1;
+  objective->floors[1] = objectiveFloor2;
 
   // cursor control
   int cursorTileX = 0;
@@ -70,7 +75,9 @@ int main() {
       stash = stashFloor(city1, cursorTileX, cursorTileZ, stash, maxStashSize);
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-      stash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
+      Building *newStash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
+      if (newStash != stash && compareBuilding(city1->buildings[findBuildingNb(city1, cursorTileX, cursorTileZ)], objective) == 1) points++;
+      stash = newStash;
     }
 
     // drawing
@@ -89,6 +96,7 @@ int main() {
   // de-init
   freeCity(city1);
   freeBuilding(stash);
+  freeBuilding(objective);
 
   return 0;
 }
