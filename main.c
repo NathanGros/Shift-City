@@ -172,14 +172,14 @@ void printBuilding(Building *building) {
 void drawFloor(Floor *floor, int positionX, int positionY, int height) {
   int maxFloorSize = 8;
   float heightFactor = 0.2;
-  Vector3 position = (Vector3) {positionX, heightFactor * height, positionY};
+  Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height, positionY + 0.5f};
   float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
   DrawCylinder(position, radius, radius, heightFactor, 4, BLUE);
   DrawCylinderWires(position, radius, radius, heightFactor, 4, WHITE);
 }
 
 void drawBuilding(Building *building) {
-  Vector3 supportPosition = (Vector3) {building->positionX, -0.5, building->positionY};
+  Vector3 supportPosition = (Vector3) {building->positionX + 0.5f, -0.5f, building->positionY + 0.5f};
   DrawCube(supportPosition, 1., 1., 1., GRAY);
   DrawCubeWires(supportPosition, 1., 1., 1., BLACK);
   for (int i = 0; i < building->nbFloors; i++) {
@@ -258,6 +258,25 @@ Building* dropFloor(City *city, int buildingX, int buildingY, Building *stash) {
   return updatedBuildings[0];
 }
 
+void updateCursorBuildingCoordinates(Camera camera, City *city, int *cursorBuildingX, int *cursorBuildingY) {
+  for (int i = 0; i < city->nbBuildings; i++) {
+    Building *current = city->buildings[i];
+    int bX = current->positionX;
+    int bY = current->positionY;
+    Vector2 vertexArray[4] = {
+      GetWorldToScreen((Vector3) {(float) bX, 0.0f, (float) bY}, camera),
+      GetWorldToScreen((Vector3) {(float) bX+1, 0.0f, (float) bY}, camera),
+      GetWorldToScreen((Vector3) {(float) bX+1, 0.0f, (float) bY+1}, camera),
+      GetWorldToScreen((Vector3) {(float) bX, 0.0f, (float) bY+1}, camera)
+    };
+    if (CheckCollisionPointPoly(GetMousePosition(), vertexArray, 4)) {
+      *cursorBuildingX = bX;
+      *cursorBuildingY = bY;
+      break;
+    }
+  }
+}
+
 
 
 int main() {
@@ -265,8 +284,6 @@ int main() {
   Color backgroundColor = (Color) {200, 200, 200, 255};
   Init(backgroundColor);
   ToggleFullscreen();
-  int screenWidth = GetScreenWidth();
-  int screenHeight = GetScreenHeight();
 
   // camera control
   float pi = 3.141592;
@@ -281,27 +298,35 @@ int main() {
   camera.fovy = 70.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
 
+  // cursor control
+  int cursorBuildingX = 0;
+  int cursorBuildingY = 0;
+
   // initialize space
   Building *stash = makeBuilding(0, 0, 0);
   City *city1 = buildWholeCity();
 
+  stash = dropFloor(city1, 0, 3, stash);
   stash = stashFloor(city1, 0, 0, stash);
-  stash = dropFloor(city1, 0, 1, stash);
+  stash = dropFloor(city1, 0, 3, stash);
   
   while (!WindowShouldClose()) {
-    // resize window
-    if (IsWindowResized()) {
-      screenWidth = GetScreenWidth();
-      screenHeight = GetScreenHeight();
-    }
-
     updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
+    updateCursorBuildingCoordinates(camera, city1, &cursorBuildingX, &cursorBuildingY);
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+      stash = stashFloor(city1, cursorBuildingX, cursorBuildingY, stash);
+    }
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      stash = dropFloor(city1, cursorBuildingX, cursorBuildingY, stash);
+    }
 
     // drawing
     BeginDrawing();
       ClearBackground(backgroundColor);
       BeginMode3D(camera);
         drawCity(city1);
+        DrawPlane((Vector3) {cursorBuildingX + 0.5f, 0.001f, cursorBuildingY + 0.5f}, (Vector2) {1.0f, 1.0f}, DARKGRAY); 
       EndMode3D();
     EndDrawing();
   }
