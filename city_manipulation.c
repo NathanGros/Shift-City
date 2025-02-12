@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 #include "city_manipulation.h"
 
 City* buildWholeCity() {
@@ -116,4 +118,23 @@ int compareBuilding(Building *building1, Building *building2) {
     if (compareFloor(building1->floors[i], building2->floors[i]) == 0) return 0;
   }
   return 1;
+}
+
+Building* makeBuildingNFloors(int n) {
+  Building *building = makeBuilding(0, 0, n);
+  int floorSize = n;
+  for (int i = 0; i < n; i++) {
+    Floor *newFloor = makeFloor(floorSize, floorSize-1, 0);
+    building->floors[i] = newFloor;
+    floorSize--;
+  }
+  return building;
+}
+
+Building* makeNewObjective(Building *objective) {
+  srand(time(NULL));
+  int nbFloors = rand() % 4 + 1; // make random height perfect pyramid objective
+  Building *newObjective = makeBuildingNFloors(nbFloors);
+  freeBuilding(objective);
+  return newObjective;
 }

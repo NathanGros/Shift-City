@@ -12,5 +12,6 @@ Building* stashFloor(City *city, int buildingX, int buildingZ, Building *stash, 
 Building* dropFloor(City *city, int buildingX, int buildingZ, Building *stash);
 int compareFloor(Floor *floor1, Floor *floor2);
 int compareBuilding(Building *building1, Building *building2);
+Building* makeNewObjective(Building *objective);
 
 #endif

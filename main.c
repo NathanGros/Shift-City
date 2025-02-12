@@ -76,7 +76,10 @@ int main() {
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
       Building *newStash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
-      if (newStash != stash && compareBuilding(city1->buildings[findBuildingNb(city1, cursorTileX, cursorTileZ)], objective) == 1) points++;
+      if (newStash != stash && compareBuilding(city1->buildings[findBuildingNb(city1, cursorTileX, cursorTileZ)], objective) == 1) {
+        points++;
+        objective = makeNewObjective(objective);
+      }
       stash = newStash;
     }
 
