@@ -131,6 +131,13 @@ Building* makeBuildingNFloors(int n) {
   return building;
 }
 
+Building* makeObjective() {
+  srand(time(NULL));
+  int nbFloors = rand() % 4 + 1; // make random height perfect pyramid objective
+  Building *newObjective = makeBuildingNFloors(nbFloors);
+  return newObjective;
+}
+
 Building* makeNewObjective(Building *objective) {
   srand(time(NULL));
   int nbFloors = rand() % 4 + 1; // make random height perfect pyramid objective

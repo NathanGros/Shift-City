@@ -52,11 +52,7 @@ int main() {
 
   // score related
   int points = 0;
-  Building *objective = makeBuilding(0, 0, 2);
-  Floor *objectiveFloor1 = makeFloor(2, 1, 0);
-  Floor *objectiveFloor2 = makeFloor(1, 0, 0);
-  objective->floors[0] = objectiveFloor1;
-  objective->floors[1] = objectiveFloor2;
+  Building *objective = makeObjective();
 
   // cursor control
   int cursorTileX = 0;
