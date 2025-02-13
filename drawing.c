@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <raylib.h>
 #include "drawing.h"
 
@@ -25,7 +27,10 @@ void drawStash(Building *stash, int tileX, int tileZ) {
   }
 }
 
-void drawObjective(Building *objective) {
+void drawObjective(Building *objective, Camera3D camera) {
+  Vector3 pos = GetScreenToWorldRay((Vector2) {100, 100}, camera).position;
+  printf("%f, %f, %f\n", pos.x, pos.y, pos.z);
+  DrawCubeWires(pos, 1., 1., 1., RED);
   Vector3 supportPosition = (Vector3) {0.5f, -0.5f, -1.5f};
   DrawCube(supportPosition, 1., 1., 1., RED);
   DrawCubeWires(supportPosition, 1., 1., 1., BLACK);
