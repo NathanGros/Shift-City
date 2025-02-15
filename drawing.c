@@ -27,15 +27,12 @@ void drawStash(Building *stash, int tileX, int tileZ) {
   }
 }
 
-void drawObjective(Building *objective, Camera3D camera) {
-  Vector3 pos = GetScreenToWorldRay((Vector2) {100, 100}, camera).position;
-  printf("%f, %f, %f\n", pos.x, pos.y, pos.z);
-  DrawCubeWires(pos, 1., 1., 1., RED);
-  Vector3 supportPosition = (Vector3) {0.5f, -0.5f, -1.5f};
-  DrawCube(supportPosition, 1., 1., 1., RED);
-  DrawCubeWires(supportPosition, 1., 1., 1., BLACK);
+void drawObjective(Building *objective) {
+  Vector3 supportPosition = (Vector3) {0.5f, -0.2f, 0.5f};
+  DrawCube(supportPosition, 1., 0.4, 1., GRAY);
+  DrawCubeWires(supportPosition, 1., 0.4, 1., BLACK);
   for (int i = 0; i < objective->nbFloors; i++) {
-    drawFloor(objective->floors[i], 0.0f, 0.0f, -2.0f, i);
+    drawFloor(objective->floors[i], 0, 0.0f, 0, i);
   }
 }
 
@@ -64,4 +61,9 @@ void drawPoints(int points) {
       points = (points - lastDigit) / 10;
     }
   }
+}
+
+void drawObjectiveButton() {
+  DrawRectangle(20, 20, 180, 45, WHITE);
+  DrawText("Objectives", 30, 30, 30, BLACK);
 }

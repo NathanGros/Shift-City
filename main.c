@@ -34,6 +34,7 @@ void Init(Color backgroundColor) {
 int main() {
   // init
   Color backgroundColor = (Color) {200, 200, 200, 255};
+  Color objectivesBackgroundColor = (Color) {100, 100, 100, 255};
   Init(backgroundColor);
   ToggleFullscreen();
 
@@ -50,7 +51,14 @@ int main() {
   camera.fovy = 70.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
 
-  // score related
+  // objectives
+  int objectiveView = 0; //if 1 then enter objective view mode
+  Camera3D objectivesCamera = {0};
+  objectivesCamera.position = (Vector3) {2.0f, 2.0f, 3.0f};
+  objectivesCamera.target = (Vector3) {0.0f, 0.0f, 1.0f};
+  objectivesCamera.up = (Vector3) {0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
+  objectivesCamera.fovy = 10.0f; // Camera field-of-view Y
+  objectivesCamera.projection = CAMERA_ORTHOGRAPHIC;
   int points = 0;
   Building *objective = makeObjective();
 
@@ -64,35 +72,48 @@ int main() {
   int maxStashSize = 1;
   
   while (!WindowShouldClose()) {
-    updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
-    updateCursorBuildingCoordinates(camera, city1, &cursorTileX, &cursorTileZ);
-
-    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-      stash = stashFloor(city1, cursorTileX, cursorTileZ, stash, maxStashSize);
-    }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-      Building *newStash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
-      if (newStash != stash && compareBuilding(city1->buildings[findBuildingNb(city1, cursorTileX, cursorTileZ)], objective) == 1) {
-        points++;
-        objective = makeNewObjective(objective);
-      }
-      stash = newStash;
+      int mouseX = GetMouseX();
+      int mouseY = GetMouseY();
+      if (mouseX > 20 && mouseX < 180 && mouseY > 20 && mouseY < 45) objectiveView = (objectiveView + 1) % 2;
     }
+    if (objectiveView == 0) {
+      // input
+      updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
+      updateCursorBuildingCoordinates(camera, city1, &cursorTileX, &cursorTileZ);
+      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        stash = stashFloor(city1, cursorTileX, cursorTileZ, stash, maxStashSize);
+      }
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        Building *newStash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
+        if (newStash != stash && compareBuilding(city1->buildings[findBuildingNb(city1, cursorTileX, cursorTileZ)], objective) == 1) {
+          points++;
+          objective = makeNewObjective(objective);
+        }
+        stash = newStash;
+      }
 
-    // drawing
-    BeginDrawing();
-      ClearBackground(backgroundColor);
-      BeginMode3D(camera);
-        drawCity(city1);
-        drawSelectedTile(cursorTileX, cursorTileZ);
-        drawStash(stash, cursorTileX, cursorTileZ);
-      EndMode3D();
-      drawPoints(points);
-
-      BeginMode3D(camera);
-      drawObjective(objective, camera);
-      EndMode3D();
-    EndDrawing();
+      // drawing
+      BeginDrawing();
+        ClearBackground(backgroundColor);
+        BeginMode3D(camera);
+          drawCity(city1);
+          drawSelectedTile(cursorTileX, cursorTileZ);
+          drawStash(stash, cursorTileX, cursorTileZ);
+        EndMode3D();
+        drawPoints(points);
+        drawObjectiveButton();
+      EndDrawing();
+    }
+    else {
+      BeginDrawing();
+        ClearBackground(objectivesBackgroundColor);
+        BeginMode3D(objectivesCamera);
+          drawObjective(objective);
+        EndMode3D();
+        drawObjectiveButton();
+      EndDrawing();
+    }
   }
   CloseWindow();
 
