@@ -75,7 +75,7 @@ int main() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
       int mouseX = GetMouseX();
       int mouseY = GetMouseY();
-      if (mouseX > 20 && mouseX < 180 && mouseY > 20 && mouseY < 45) objectiveView = (objectiveView + 1) % 2;
+      if (mouseX > 20 && mouseX < 200 && mouseY > 20 && mouseY < 65) objectiveView = (objectiveView + 1) % 2;
     }
     if (objectiveView == 0) {
       // input
