@@ -7,6 +7,7 @@
 #include "drawing.h"
 #include "input_management.h"
 #include "city_manipulation.h"
+#include "objectives.h"
 
 
 
@@ -16,18 +17,6 @@ void Init(Color backgroundColor) {
   ClearBackground(backgroundColor);
   SetTargetFPS(60);
 }
-
-/*void printFloor(Floor *floor) {*/
-/*  printf("Floor : bottomSize %d, topSize %d, nbLinks %d\n", floor->bottomSize, floor->topSize, floor->nbLinks);*/
-/*}*/
-
-/*void printBuilding(Building *building) {*/
-/*  printf("Building : X %d, Z %d, nbFloors %d\n", building->positionX, building->positionZ, building->nbFloors);*/
-/*  for (int i = 0; i < building->nbFloors; i++) {*/
-/*    printf("\t%d ", i);*/
-/*    printFloor(building->floors[i]);*/
-/*  }*/
-/*}*/
 
 
 
@@ -54,13 +43,13 @@ int main() {
   // objectives
   int objectiveView = 0; //if 1 then enter objective view mode
   Camera3D objectivesCamera = {0};
-  objectivesCamera.position = (Vector3) {2.0f, 2.0f, 3.0f};
-  objectivesCamera.target = (Vector3) {0.0f, 0.0f, 1.0f};
+  objectivesCamera.position = (Vector3) {11.0f, 2.0f, 1.0f};
+  objectivesCamera.target = (Vector3) {9.0f, 0.0f, -1.0f};
   objectivesCamera.up = (Vector3) {0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
   objectivesCamera.fovy = 10.0f; // Camera field-of-view Y
   objectivesCamera.projection = CAMERA_ORTHOGRAPHIC;
   int points = 0;
-  Building *objective = makeObjective();
+  AllObjectives *allObjectives = BuildAllObjectives();
 
   // cursor control
   int cursorTileX = 0;
@@ -86,9 +75,9 @@ int main() {
       }
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Building *newStash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
-        if (newStash != stash && compareBuilding(city1->buildings[findBuildingNb(city1, cursorTileX, cursorTileZ)], objective) == 1) {
-          points++;
-          objective = makeNewObjective(objective);
+        // check if a floor was dropped
+        if (newStash != stash) {
+          checkObjectiveCompletion(city1->buildings[findBuildingNb(city1, cursorTileX, cursorTileZ)], allObjectives, &points);
         }
         stash = newStash;
       }
@@ -109,8 +98,9 @@ int main() {
       BeginDrawing();
         ClearBackground(objectivesBackgroundColor);
         BeginMode3D(objectivesCamera);
-          drawObjective(objective);
+          drawAllObjectives(allObjectives);
         EndMode3D();
+        drawPoints(points);
         drawObjectiveButton();
       EndDrawing();
     }
@@ -120,7 +110,7 @@ int main() {
   // de-init
   freeCity(city1);
   freeBuilding(stash);
-  freeBuilding(objective);
+  freeAllObjectives(allObjectives);
 
   return 0;
 }

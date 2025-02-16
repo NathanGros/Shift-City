@@ -10,9 +10,6 @@ void moveFloor(Building **updatedBuildings, Building *buildingSrc, Building *bui
 int findBuildingNb(City *city, int buildingX, int buildingZ);
 Building* stashFloor(City *city, int buildingX, int buildingZ, Building *stash, int maxStashSize);
 Building* dropFloor(City *city, int buildingX, int buildingZ, Building *stash);
-int compareFloor(Floor *floor1, Floor *floor2);
-int compareBuilding(Building *building1, Building *building2);
-Building* makeObjective();
-Building* makeNewObjective(Building *objective);
+Building* makeBuildingNFloors(int n);
 
 #endif

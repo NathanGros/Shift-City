@@ -46,3 +46,46 @@ void freeCity(City *city) {
     free(city->buildings);
     free(city);
 }
+
+Objective* makeObjective(int reward) {
+  Objective *objective = malloc(sizeof(Objective));
+  objective->state = -1;
+  objective->reward = reward;
+  objective->building = malloc(sizeof(Building));
+  return objective;
+}
+
+void freeObjective(Objective *objective) {
+  freeBuilding(objective->building);
+  free(objective);
+}
+
+ObjectiveRow *makeObjectiveRow(int nbObjectives) {
+  ObjectiveRow *objectiveRow = malloc(sizeof(ObjectiveRow));
+  objectiveRow->nbObjectives = nbObjectives;
+  objectiveRow->objectives = malloc(nbObjectives * sizeof(Objective*));
+  return objectiveRow;
+}
+
+void freeObjectiveRow(ObjectiveRow *objectiveRow) {
+  for (int i = 0; i < objectiveRow->nbObjectives; i++) {
+    freeObjective(objectiveRow->objectives[i]);
+  }
+  free(objectiveRow->objectives);
+  free(objectiveRow);
+}
+
+AllObjectives *makeAllObjectives(int nbRows) {
+  AllObjectives *allObjectives = malloc(sizeof(AllObjectives));
+  allObjectives->nbRows = nbRows;
+  allObjectives->objectiveRows = malloc(nbRows * sizeof(ObjectiveRow));
+  return allObjectives;
+}
+
+void freeAllObjectives(AllObjectives *allObjectives) {
+  for (int i = 0; i < allObjectives->nbRows; i++) {
+    freeObjectiveRow(allObjectives->objectiveRows[i]);
+  }
+  free(allObjectives->objectiveRows);
+  free(allObjectives);
+}

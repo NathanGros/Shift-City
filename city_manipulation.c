@@ -1,7 +1,17 @@
 #include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
 #include "city_manipulation.h"
+
+/*void printFloor(Floor *floor) {*/
+/*  printf("Floor : bottomSize %d, topSize %d, nbLinks %d\n", floor->bottomSize, floor->topSize, floor->nbLinks);*/
+/*}*/
+
+/*void printBuilding(Building *building) {*/
+/*  printf("Building : X %d, Z %d, nbFloors %d\n", building->positionX, building->positionZ, building->nbFloors);*/
+/*  for (int i = 0; i < building->nbFloors; i++) {*/
+/*    printf("\t%d ", i);*/
+/*    printFloor(building->floors[i]);*/
+/*  }*/
+/*}*/
 
 City* buildWholeCity() {
   Floor *floor1 = makeFloor(8, 7, 0);
@@ -14,7 +24,10 @@ City* buildWholeCity() {
   Floor *floor8 = makeFloor(1, 0, 0);
   Building *building1 = makeBuilding(0, 0, 8);
   Building *building2 = makeBuilding(0, 1, 0);
-  Building *building3 = makeBuilding(0, 2, 0);
+  Building *building3 = makeBuilding(0, 3, 0);
+  Building *building4 = makeBuilding(1, 0, 0);
+  Building *building5 = makeBuilding(1, 2, 0);
+  Building *building6 = makeBuilding(1, 3, 0);
   building1->floors[0] = floor1;
   building1->floors[1] = floor2;
   building1->floors[2] = floor3;
@@ -23,10 +36,13 @@ City* buildWholeCity() {
   building1->floors[5] = floor6;
   building1->floors[6] = floor7;
   building1->floors[7] = floor8;
-  City *city1 = makeCity(3);
+  City *city1 = makeCity(6);
   city1->buildings[0] = building1;
   city1->buildings[1] = building2;
   city1->buildings[2] = building3;
+  city1->buildings[3] = building4;
+  city1->buildings[4] = building5;
+  city1->buildings[5] = building6;
   return city1;
 }
 
@@ -105,21 +121,6 @@ Building* dropFloor(City *city, int buildingX, int buildingZ, Building *stash) {
   return updatedBuildings[0];
 }
 
-int compareFloor(Floor *floor1, Floor *floor2) { //TODO when adding shared floors
-  if (floor1->bottomSize == floor2->bottomSize
-      && floor1->topSize == floor2->topSize
-      && floor1->nbLinks == floor2->nbLinks) return 1;
-  return 0;
-}
-
-int compareBuilding(Building *building1, Building *building2) {
-  if (building1->nbFloors != building2->nbFloors) return 0;
-  for (int i = 0; i < building1->nbFloors; i++) {
-    if (compareFloor(building1->floors[i], building2->floors[i]) == 0) return 0;
-  }
-  return 1;
-}
-
 Building* makeBuildingNFloors(int n) {
   Building *building = makeBuilding(0, 0, n);
   int floorSize = n;
@@ -129,19 +130,4 @@ Building* makeBuildingNFloors(int n) {
     floorSize--;
   }
   return building;
-}
-
-Building* makeObjective() {
-  srand(time(NULL));
-  int nbFloors = rand() % 4 + 1; // make random height perfect pyramid objective
-  Building *newObjective = makeBuildingNFloors(nbFloors);
-  return newObjective;
-}
-
-Building* makeNewObjective(Building *objective) {
-  srand(time(NULL));
-  int nbFloors = rand() % 4 + 1; // make random height perfect pyramid objective
-  Building *newObjective = makeBuildingNFloors(nbFloors);
-  freeBuilding(objective);
-  return newObjective;
 }
