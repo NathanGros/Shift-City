@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+
 #include "city_manipulation.h"
 
 /*void printFloor(Floor *floor) {*/
@@ -15,13 +17,21 @@
 
 City* buildWholeCity() {
   Floor *floor1 = makeFloor(8, 7, 0);
+  floor1->model = "floor_8to7.obj";
   Floor *floor2 = makeFloor(7, 6, 0);
+  floor2->model = "floor_7to6.obj";
   Floor *floor3 = makeFloor(6, 5, 0);
+  floor3->model = "floor_6to5.obj";
   Floor *floor4 = makeFloor(5, 4, 0);
+  floor4->model = "floor_5to4.obj";
   Floor *floor5 = makeFloor(4, 3, 0);
+  floor5->model = "floor_4to3.obj";
   Floor *floor6 = makeFloor(3, 2, 0);
+  floor6->model = "floor_3to2.obj";
   Floor *floor7 = makeFloor(2, 1, 0);
+  floor7->model = "floor_2to1.obj";
   Floor *floor8 = makeFloor(1, 0, 0);
+  floor8->model = "floor_1to0.obj";
   Building *building1 = makeBuilding(0, 0, 8);
   Building *building2 = makeBuilding(0, 1, 0);
   Building *building3 = makeBuilding(0, 3, 0);
@@ -126,6 +136,18 @@ Building* makeBuildingNFloors(int n) {
   int floorSize = n;
   for (int i = 0; i < n; i++) {
     Floor *newFloor = makeFloor(floorSize, floorSize-1, 0);
+    char modelName[100] = "floor_";
+    char nb1[2];
+    char nb2[2];
+    nb1[0] = (char) (floorSize + (int) '0');
+    nb1[1] = '\0';
+    nb2[0] = (char) (floorSize - 1 + (int) '0');
+    nb2[1] = '\0';
+    strcat(modelName, nb1);
+    strcat(modelName, "to");
+    strcat(modelName, nb2);
+    strcat(modelName, ".obj");
+    strcpy(newFloor->model, modelName);
     building->floors[i] = newFloor;
     floorSize--;
   }

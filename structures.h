@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 typedef struct Floor {
+  char *model; // file name of the model
   int bottomSize;
   int topSize;
   int nbLinks;

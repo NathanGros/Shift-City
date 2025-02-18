@@ -1,15 +1,26 @@
 #include <stdio.h>
-
+#include <string.h>
 #include <raylib.h>
+
 #include "drawing.h"
 
 void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, int height) {
   int maxFloorSize = 8;
   float heightFactor = 0.2;
   Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height + altitude, positionZ + 0.5f};
-  float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
-  DrawCylinder(position, radius, radius, heightFactor, 4, BLUE);
-  DrawCylinderWires(position, radius, radius, heightFactor, 4, WHITE);
+  if (strcmp(floor->model, "") != 0) {
+    char modelName[100] = "assets/";
+    strcat(modelName, floor->model);
+    Model floorModel = LoadModel(modelName);
+    float radius = 1.;
+    DrawModel(floorModel, position, radius, WHITE);
+    UnloadModel(floorModel); //bad practice, to refactor
+  }
+  else {
+    float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
+    DrawCylinder(position, radius, radius, heightFactor, 4, BLUE);
+    DrawCylinderWires(position, radius, radius, heightFactor, 4, WHITE);
+  }
 }
 
 void drawBuilding(Building *building) {
@@ -67,7 +78,7 @@ void drawObjective(Objective *objective, float posX, float posY, float posZ) {
   Color wireColor;
   switch (objective->state) {
     case 1:
-      supportColor = (Color) {0, 200, 100, 255};
+      supportColor = (Color) {41, 230, 70, 255};
       wireColor = (Color) {100, 100, 100, 255};
       break;
     case 0:

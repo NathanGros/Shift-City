@@ -3,6 +3,7 @@
 
 Floor* makeFloor(int bottomSize, int topSize, int nbLinks) {
     Floor *floor = malloc(sizeof(Floor));
+    floor->model = malloc(100 * sizeof(char));
     floor->bottomSize = bottomSize;
     floor->topSize = topSize;
     floor->nbLinks = nbLinks;
@@ -11,6 +12,7 @@ Floor* makeFloor(int bottomSize, int topSize, int nbLinks) {
 }
 
 void freeFloor(Floor *floor) {
+    /*free(floor->model); // segfault ???*/
     free(floor->links);
     free(floor);
 }
