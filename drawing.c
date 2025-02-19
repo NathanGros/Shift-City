@@ -3,17 +3,21 @@
 #include <raylib.h>
 
 #include "drawing.h"
+#include "city_manipulation.h"
 
-void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, int height) {
+void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, int height, int isSelected) {
   int maxFloorSize = 8;
-  float heightFactor = 0.2;
+  float heightFactor = 0.09411875;
   Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height + altitude, positionZ + 0.5f};
   if (strcmp(floor->model, "") != 0) {
     char modelName[100] = "assets/";
     strcat(modelName, floor->model);
     Model floorModel = LoadModel(modelName);
     float radius = 1.;
-    DrawModel(floorModel, position, radius, WHITE);
+    if (isSelected == 1)
+      DrawModel(floorModel, position, radius, (Color) {210, 210, 210, 255});
+    else
+      DrawModel(floorModel, position, radius, WHITE);
     UnloadModel(floorModel); //bad practice, to refactor
   }
   else {
@@ -23,29 +27,34 @@ void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, i
   }
 }
 
-void drawBuilding(Building *building) {
-  Vector3 supportPosition = (Vector3) {building->positionX + 0.5f, -0.5f, building->positionZ + 0.5f};
-  DrawCube(supportPosition, 1., 1., 1., GRAY);
-  DrawCubeWires(supportPosition, 1., 1., 1., BLACK);
+void drawBuilding(Building *building, int isSelected) {
+  Vector3 supportPosition = (Vector3) {building->positionX + 0.5f, -0.11765f, building->positionZ + 0.5f};
+  Model groundModel = LoadModel("assets/ground_pine_pool.obj");
+  float radius = 1.;
+  if (isSelected == 1)
+    DrawModel(groundModel, supportPosition, radius, (Color) {210, 210, 210, 255});
+  else
+    DrawModel(groundModel, supportPosition, radius, WHITE);
+  UnloadModel(groundModel); //bad practice, to refactor
   for (int i = 0; i < building->nbFloors; i++) {
-    drawFloor(building->floors[i], (float) building->positionX, 0.0f, (float) building->positionZ, i);
+    drawFloor(building->floors[i], (float) building->positionX, 0.0f, (float) building->positionZ, i, isSelected);
   }
 }
 
 void drawStash(Building *stash, int tileX, int tileZ) {
   for (int i = 0; i < stash->nbFloors; i++) {
-    drawFloor(stash->floors[i], tileX, 2.0f, tileZ, i);
+    drawFloor(stash->floors[i], tileX, 1.0f, tileZ, i, 0);
   }
 }
 
-void drawCity(City *city) {
+void drawCity(City *city, int selectedTileX, int selectedTileZ) {
+  int selectedBuildingNb = findBuildingNb(city, selectedTileX, selectedTileZ);
   for (int i = 0; i < city->nbBuildings; i++) {
-    drawBuilding(city->buildings[i]);
+    if (i == selectedBuildingNb)
+      drawBuilding(city->buildings[i], 1);
+    else
+      drawBuilding(city->buildings[i], 0);
   }
-}
-
-void drawSelectedTile(int tileX, int tileZ) {
-  DrawPlane((Vector3) {tileX + 0.5f, 0.001f, tileZ + 0.5f}, (Vector2) {1.0f, 1.0f}, DARKGRAY); 
 }
 
 void drawPoints(int points) {
@@ -92,7 +101,7 @@ void drawObjective(Objective *objective, float posX, float posY, float posZ) {
   DrawCube(supportPosition, 1., 0.4, 1., supportColor);
   DrawCubeWires(supportPosition, 1., 0.4, 1., wireColor);
   for (int i = 0; i < objective->building->nbFloors; i++) {
-    drawFloor(objective->building->floors[i], posX, posY, posZ, i);
+    drawFloor(objective->building->floors[i], posX, posY, posZ, i, 0);
   }
 }
 

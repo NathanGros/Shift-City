@@ -22,7 +22,7 @@ void Init(Color backgroundColor) {
 
 int main() {
   // init
-  Color backgroundColor = (Color) {200, 200, 200, 255};
+  Color backgroundColor = (Color) {100, 100, 100, 255};
   Color objectivesBackgroundColor = (Color) {100, 100, 100, 255};
   Init(backgroundColor);
   ToggleFullscreen();
@@ -90,8 +90,7 @@ int main() {
       BeginDrawing();
         ClearBackground(backgroundColor);
         BeginMode3D(camera);
-          drawCity(city1);
-          drawSelectedTile(cursorTileX, cursorTileZ);
+          drawCity(city1, cursorTileX, cursorTileZ);
           drawStash(stash, cursorTileX, cursorTileZ);
         EndMode3D();
         drawPoints(points);
