@@ -15,6 +15,7 @@ Floor* makeFloor(int bottomSize, int topSize, int nbLinks);
 void freeFloor(Floor *floor);
 
 typedef struct {
+  char *groundModel; // file name of the model
   int positionX;
   int positionZ;
   int nbFloors;

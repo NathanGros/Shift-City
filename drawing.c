@@ -10,7 +10,7 @@ void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, i
   float heightFactor = 0.09411875;
   Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height + altitude, positionZ + 0.5f};
   if (strcmp(floor->model, "") != 0) {
-    char modelName[100] = "assets/";
+    char modelName[100] = "assets/floors/";
     strcat(modelName, floor->model);
     Model floorModel = LoadModel(modelName);
     float radius = 1.;
@@ -29,8 +29,15 @@ void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, i
 
 void drawBuilding(Building *building, int isSelected) {
   Vector3 supportPosition = (Vector3) {building->positionX + 0.5f, -0.11765f, building->positionZ + 0.5f};
-  Model groundModel = LoadModel("assets/ground_pine_pool.obj");
   float radius = 1.;
+  Model groundModel;
+  if (strcmp(building->groundModel, "") != 0) {
+    char modelName[100] = "assets/grounds/";
+    strcat(modelName, building->groundModel);
+    groundModel = LoadModel(modelName);
+  }
+  else 
+    groundModel = LoadModel("assets/grounds/ground_pine_pool.obj");
   if (isSelected == 1)
     DrawModel(groundModel, supportPosition, radius, (Color) {210, 210, 210, 255});
   else

@@ -33,11 +33,17 @@ City* buildWholeCity() {
   Floor *floor8 = makeFloor(1, 0, 0);
   floor8->model = "floor_1to0.obj";
   Building *building1 = makeBuilding(0, 0, 8);
+  building1->groundModel = "ground_pine_pool.obj";
   Building *building2 = makeBuilding(0, 1, 0);
+  building2->groundModel = "ground_pool.obj";
   Building *building3 = makeBuilding(0, 3, 0);
+  building3->groundModel = "ground.obj";
   Building *building4 = makeBuilding(1, 0, 0);
+  building4->groundModel = "ground.obj";
   Building *building5 = makeBuilding(1, 2, 0);
+  building5->groundModel = "ground_pine_pool.obj";
   Building *building6 = makeBuilding(1, 3, 0);
+  building6->groundModel = "ground_pool.obj";
   building1->floors[0] = floor1;
   building1->floors[1] = floor2;
   building1->floors[2] = floor3;
@@ -63,6 +69,7 @@ Building* addFloor(Building *building, Floor *floor) {
     newBuilding->floors[i] = building->floors[i];
   }
   newBuilding->floors[nbFloors] = floor;
+  newBuilding->groundModel = building->groundModel;
   free(building->floors);
   free(building);
   return newBuilding;
@@ -74,6 +81,7 @@ Building* removeFloor(Building *building) {
   for (int i = 0; i < nbFloors - 1; i++) {
     newBuilding->floors[i] = building->floors[i];
   }
+  newBuilding->groundModel = building->groundModel;
   free(building->floors);
   free(building);
   return newBuilding;

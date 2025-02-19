@@ -37,7 +37,7 @@ int main() {
   camera.position = (Vector3) {0.0f, 0.0f, 0.0f};
   camera.target = (Vector3) {0.0f, 0.0f, 1.0f};
   camera.up = (Vector3) {0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
-  camera.fovy = 70.0f; // Camera field-of-view Y
+  camera.fovy = 40.0f; // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE;
 
   // objectives
