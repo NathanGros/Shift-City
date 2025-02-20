@@ -67,8 +67,10 @@ AllObjectives* BuildAllObjectives() {
   Building *objective7Building = makeBuilding(0, 0, 2);
   Floor *floor1 = makeFloor(4, 3, 0);
   floor1->model = "floor_4to3.obj";
+  floor1->height = 0.15625;
   Floor *floor2 = makeFloor(1, 0, 0);
   floor2->model = "floor_1to0.obj";
+  floor2->height = 0.15625;
   objective7Building->floors[0] = floor1;
   objective7Building->floors[1] = floor2;
   objective7->building = objective7Building;

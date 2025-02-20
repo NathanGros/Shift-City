@@ -18,20 +18,28 @@
 City* buildWholeCity() {
   Floor *floor1 = makeFloor(8, 7, 0);
   floor1->model = "floor_8to7.obj";
+  floor1->height = 0.15625;
   Floor *floor2 = makeFloor(7, 6, 0);
   floor2->model = "floor_7to6.obj";
+  floor2->height = 0.15625;
   Floor *floor3 = makeFloor(6, 5, 0);
   floor3->model = "floor_6to5.obj";
+  floor3->height = 0.15625;
   Floor *floor4 = makeFloor(5, 4, 0);
   floor4->model = "floor_5to4.obj";
+  floor4->height = 0.15625;
   Floor *floor5 = makeFloor(4, 3, 0);
   floor5->model = "floor_4to3.obj";
+  floor5->height = 0.15625;
   Floor *floor6 = makeFloor(3, 2, 0);
   floor6->model = "floor_3to2.obj";
+  floor6->height = 0.15625;
   Floor *floor7 = makeFloor(2, 1, 0);
   floor7->model = "floor_2to1.obj";
+  floor7->height = 0.15625;
   Floor *floor8 = makeFloor(1, 0, 0);
   floor8->model = "floor_1to0.obj";
+  floor8->height = 0.15625;
   Building *building1 = makeBuilding(0, 0, 8);
   building1->groundModel = "ground_pine_pool.obj";
   Building *building2 = makeBuilding(0, 1, 0);
@@ -156,6 +164,7 @@ Building* makeBuildingNFloors(int n) {
     strcat(modelName, nb2);
     strcat(modelName, ".obj");
     strcpy(newFloor->model, modelName);
+    newFloor->height = 0.15625;
     building->floors[i] = newFloor;
     floorSize--;
   }

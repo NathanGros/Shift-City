@@ -7,6 +7,7 @@ typedef struct Floor {
   char *model; // file name of the model
   int bottomSize;
   int topSize;
+  float height;
   int nbLinks;
   struct Floor **links; // pointer to a list of other floors' pointers
 } Floor;

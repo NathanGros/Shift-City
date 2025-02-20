@@ -5,6 +5,7 @@
 Floor* makeFloor(int bottomSize, int topSize, int nbLinks) {
   Floor *floor = malloc(sizeof(Floor));
   floor->model = malloc(100 * sizeof(char));
+  floor->height = 0.0;
   strcpy(floor->model, "");
   floor->bottomSize = bottomSize;
   floor->topSize = topSize;

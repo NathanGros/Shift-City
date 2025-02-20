@@ -5,14 +5,14 @@
 #include "drawing.h"
 #include "city_manipulation.h"
 
-void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, int height, int isSelected) {
+void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, int isSelected) {
   int maxFloorSize = 8;
-  float heightFactor = 0.09411875;
-  Vector3 position = (Vector3) {positionX + 0.5f, heightFactor * height + altitude, positionZ + 0.5f};
+  Vector3 position = (Vector3) {positionX + 0.5f, altitude, positionZ + 0.5f};
   if (strcmp(floor->model, "") != 0) {
     char modelName[100] = "assets/floors/";
     strcat(modelName, floor->model);
     Model floorModel = LoadModel(modelName);
+    /*Model floorModel = LoadModel("assets/strata/stratum_9to8.obj");*/
     float radius = 1.;
     if (isSelected == 1)
       DrawModel(floorModel, position, radius, (Color) {210, 210, 210, 255});
@@ -22,8 +22,8 @@ void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, i
   }
   else {
     float radius = (double) floor->bottomSize / (double) maxFloorSize / 2.;
-    DrawCylinder(position, radius, radius, heightFactor, 4, BLUE);
-    DrawCylinderWires(position, radius, radius, heightFactor, 4, WHITE);
+    DrawCylinder(position, radius, radius, floor->height, 4, BLUE);
+    DrawCylinderWires(position, radius, radius, floor->height, 4, WHITE);
   }
 }
 
@@ -43,14 +43,18 @@ void drawBuilding(Building *building, int isSelected) {
   else
     DrawModel(groundModel, supportPosition, radius, WHITE);
   UnloadModel(groundModel); //bad practice, to refactor
+  float currentFloorHeight = 0.0;
   for (int i = 0; i < building->nbFloors; i++) {
-    drawFloor(building->floors[i], (float) building->positionX, 0.0f, (float) building->positionZ, i, isSelected);
+    drawFloor(building->floors[i], (float) building->positionX, currentFloorHeight, (float) building->positionZ, isSelected);
+    currentFloorHeight += building->floors[i]->height;
   }
 }
 
 void drawStash(Building *stash, int tileX, int tileZ) {
+  float currentFloorHeight = 0.0;
   for (int i = 0; i < stash->nbFloors; i++) {
-    drawFloor(stash->floors[i], tileX, 1.0f, tileZ, i, 0);
+    drawFloor(stash->floors[i], tileX, 1.5f + currentFloorHeight, tileZ, 0);
+    currentFloorHeight += stash->floors[i]->height;
   }
 }
 
@@ -107,8 +111,10 @@ void drawObjective(Objective *objective, float posX, float posY, float posZ) {
   }
   DrawCube(supportPosition, 1., 0.4, 1., supportColor);
   DrawCubeWires(supportPosition, 1., 0.4, 1., wireColor);
+  float currentFloorHeight = 0.0;
   for (int i = 0; i < objective->building->nbFloors; i++) {
-    drawFloor(objective->building->floors[i], posX, posY, posZ, i, 0);
+    drawFloor(objective->building->floors[i], posX, posY + currentFloorHeight, posZ, 0);
+    currentFloorHeight += objective->building->floors[i]->height;
   }
 }
 
