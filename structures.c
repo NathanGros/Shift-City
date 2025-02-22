@@ -6,6 +6,7 @@
 
 // load all floor models
 Model floorModels[8];
+float floorModelHeights[8];
 Model groundModel;
 
 void loadFloorModels() {
@@ -13,6 +14,7 @@ void loadFloorModels() {
     char modelName[100];
     sprintf(modelName, "assets/floors/floor_%dto%d.obj", i + 1, i);
     floorModels[i] = LoadModel(modelName);
+    floorModelHeights[i] = 0.09375; // TODO height to modify for each floor / strata
   }
 }
 
@@ -42,7 +44,7 @@ Floor *makeFloor(int bottomSize, int topSize, int nbLinks) {
   Floor *floor = malloc(sizeof(Floor));
 
   floor->model = &floorModels[bottomSize - 1];
-  floor->height = 0.15625;
+  floor->height = floorModelHeights[bottomSize - 1];
   floor->bottomSize = bottomSize;
   floor->topSize = topSize;
   floor->nbLinks = nbLinks;
