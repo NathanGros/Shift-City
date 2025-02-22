@@ -10,7 +10,6 @@ void drawFloor(Floor *floor, float positionX, float altitude, float positionZ,
   Vector3 position = (Vector3){positionX + 0.5f, altitude, positionZ + 0.5f};
   Model floorModel = *(floor->model);
   float radius = 1.;
-  printf("model valid %d\n", IsModelValid(floorModel));
   if (isSelected == 1)
     DrawModel(floorModel, position, radius, (Color){210, 210, 210, 255});
   else
@@ -47,7 +46,6 @@ void drawCity(City *city, int selectedTileX, int selectedTileZ) {
 
   int selectedBuildingNb = findBuildingNb(city, selectedTileX, selectedTileZ);
   for (int i = 0; i < city->nbBuildings; i++) {
-    printf("Drawing building %d\n", i);
     if (i == selectedBuildingNb)
       drawBuilding(city->buildings[i], 1);
     else
