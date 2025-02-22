@@ -3,24 +3,26 @@
 
 #include <stdlib.h>
 
+#include "raylib.h"
+
 typedef struct Floor {
-  char *model; // file name of the model
   int bottomSize;
   int topSize;
   float height;
   int nbLinks;
   struct Floor **links; // pointer to a list of other floors' pointers
+  Model *model;
 } Floor;
 
 Floor* makeFloor(int bottomSize, int topSize, int nbLinks);
 void freeFloor(Floor *floor);
 
 typedef struct {
-  char *groundModel; // file name of the model
   int positionX;
   int positionZ;
   int nbFloors;
   Floor **floors; // pointer to a list of floor pointers
+  Model *groundModel;
 } Building;
 
 Building* makeBuilding(int positionX, int positionZ, int nbFloors);
@@ -58,5 +60,7 @@ typedef struct {
 
 AllObjectives *makeAllObjectives(int nbRows);
 void freeAllObjectives(AllObjectives *allObjectives);
+
+void loadModels();
 
 #endif

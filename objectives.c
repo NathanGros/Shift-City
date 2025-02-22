@@ -1,21 +1,25 @@
 #include "city_manipulation.h"
 
-int compareFloor(Floor *floor1, Floor *floor2) { //TODO when adding shared floors
-  if (floor1->bottomSize == floor2->bottomSize
-      && floor1->topSize == floor2->topSize
-      && floor1->nbLinks == floor2->nbLinks) return 1;
+int compareFloor(Floor *floor1,
+                 Floor *floor2) { // TODO when adding shared floors
+  if (floor1->bottomSize == floor2->bottomSize &&
+      floor1->topSize == floor2->topSize && floor1->nbLinks == floor2->nbLinks)
+    return 1;
   return 0;
 }
 
 int compareBuilding(Building *building1, Building *building2) {
-  if (building1->nbFloors != building2->nbFloors) return 0;
+  if (building1->nbFloors != building2->nbFloors)
+    return 0;
   for (int i = 0; i < building1->nbFloors; i++) {
-    if (compareFloor(building1->floors[i], building2->floors[i]) == 0) return 0;
+    if (compareFloor(building1->floors[i], building2->floors[i]) == 0)
+      return 0;
   }
   return 1;
 }
 
-void checkObjectiveCompletion(Building *building, AllObjectives *allObjectives, int *points) {
+void checkObjectiveCompletion(Building *building, AllObjectives *allObjectives,
+                              int *points) {
   for (int i = 0; i < allObjectives->nbRows; i++) {
     ObjectiveRow *row = allObjectives->objectiveRows[i];
     for (int j = 0; j < row->nbObjectives; j++) {
@@ -26,7 +30,7 @@ void checkObjectiveCompletion(Building *building, AllObjectives *allObjectives, 
         // change objective state and next objective state
         objective->state = 1;
         if (j < row->nbObjectives - 1)
-          row->objectives[j+1]->state = 0;
+          row->objectives[j + 1]->state = 0;
         // give points
         *points += objective->reward;
         break;
@@ -35,7 +39,7 @@ void checkObjectiveCompletion(Building *building, AllObjectives *allObjectives, 
   }
 }
 
-AllObjectives* BuildAllObjectives() {
+AllObjectives *BuildAllObjectives() {
   // making objectives
   Objective *objective1 = makeObjective(1);
   Building *objective1Building = makeBuildingNFloors(1);
@@ -66,11 +70,7 @@ AllObjectives* BuildAllObjectives() {
   Objective *objective7 = makeObjective(1);
   Building *objective7Building = makeBuilding(0, 0, 2);
   Floor *floor1 = makeFloor(4, 3, 0);
-  floor1->model = "floor_4to3.obj";
-  floor1->height = 0.15625;
   Floor *floor2 = makeFloor(1, 0, 0);
-  floor2->model = "floor_1to0.obj";
-  floor2->height = 0.15625;
   objective7Building->floors[0] = floor1;
   objective7Building->floors[1] = floor2;
   objective7->building = objective7Building;

@@ -4,62 +4,34 @@
 #include "city_manipulation.h"
 
 /*void printFloor(Floor *floor) {*/
-/*  printf("Floor : bottomSize %d, topSize %d, nbLinks %d\n", floor->bottomSize, floor->topSize, floor->nbLinks);*/
+/*  printf("Floor : bottomSize %d, topSize %d, nbLinks %d\n", floor->bottomSize,
+ * floor->topSize, floor->nbLinks);*/
 /*}*/
 
 /*void printBuilding(Building *building) {*/
-/*  printf("Building : X %d, Z %d, nbFloors %d\n", building->positionX, building->positionZ, building->nbFloors);*/
+/*  printf("Building : X %d, Z %d, nbFloors %d\n", building->positionX,
+ * building->positionZ, building->nbFloors);*/
 /*  for (int i = 0; i < building->nbFloors; i++) {*/
 /*    printf("\t%d ", i);*/
 /*    printFloor(building->floors[i]);*/
 /*  }*/
 /*}*/
 
-City* buildWholeCity() {
-  Floor *floor1 = makeFloor(8, 7, 0);
-  floor1->model = "floor_8to7.obj";
-  floor1->height = 0.15625;
-  Floor *floor2 = makeFloor(7, 6, 0);
-  floor2->model = "floor_7to6.obj";
-  floor2->height = 0.15625;
-  Floor *floor3 = makeFloor(6, 5, 0);
-  floor3->model = "floor_6to5.obj";
-  floor3->height = 0.15625;
-  Floor *floor4 = makeFloor(5, 4, 0);
-  floor4->model = "floor_5to4.obj";
-  floor4->height = 0.15625;
-  Floor *floor5 = makeFloor(4, 3, 0);
-  floor5->model = "floor_4to3.obj";
-  floor5->height = 0.15625;
-  Floor *floor6 = makeFloor(3, 2, 0);
-  floor6->model = "floor_3to2.obj";
-  floor6->height = 0.15625;
-  Floor *floor7 = makeFloor(2, 1, 0);
-  floor7->model = "floor_2to1.obj";
-  floor7->height = 0.15625;
-  Floor *floor8 = makeFloor(1, 0, 0);
-  floor8->model = "floor_1to0.obj";
-  floor8->height = 0.15625;
+City *buildWholeCity() {
   Building *building1 = makeBuilding(0, 0, 8);
-  building1->groundModel = "ground_pine_pool.obj";
+  // building1->groundModel = "ground_pine_pool.obj";
   Building *building2 = makeBuilding(0, 1, 0);
-  building2->groundModel = "ground_pool.obj";
+  // building2->groundModel = "ground_pool.obj";
   Building *building3 = makeBuilding(0, 3, 0);
-  building3->groundModel = "ground.obj";
+  // building3->groundModel = "ground.obj";
   Building *building4 = makeBuilding(1, 0, 0);
-  building4->groundModel = "ground.obj";
+  // building4->groundModel = "ground.obj";
   Building *building5 = makeBuilding(1, 2, 0);
-  building5->groundModel = "ground_pine_pool.obj";
+  // building5->groundModel = "ground_pine_pool.obj";
   Building *building6 = makeBuilding(1, 3, 0);
-  building6->groundModel = "ground_pool.obj";
-  building1->floors[0] = floor1;
-  building1->floors[1] = floor2;
-  building1->floors[2] = floor3;
-  building1->floors[3] = floor4;
-  building1->floors[4] = floor5;
-  building1->floors[5] = floor6;
-  building1->floors[6] = floor7;
-  building1->floors[7] = floor8;
+  for (int i = 0; i < 8; i++) {
+    building1->floors[i] = makeFloor(8 - i, 7 - i, 0);
+  }
   City *city1 = makeCity(6);
   city1->buildings[0] = building1;
   city1->buildings[1] = building2;
@@ -70,9 +42,10 @@ City* buildWholeCity() {
   return city1;
 }
 
-Building* addFloor(Building *building, Floor *floor) {
+Building *addFloor(Building *building, Floor *floor) {
   int nbFloors = building->nbFloors;
-  Building *newBuilding = makeBuilding(building->positionX, building->positionZ, nbFloors + 1);
+  Building *newBuilding =
+      makeBuilding(building->positionX, building->positionZ, nbFloors + 1);
   for (int i = 0; i < nbFloors; i++) {
     newBuilding->floors[i] = building->floors[i];
   }
@@ -83,9 +56,10 @@ Building* addFloor(Building *building, Floor *floor) {
   return newBuilding;
 }
 
-Building* removeFloor(Building *building) {
+Building *removeFloor(Building *building) {
   int nbFloors = building->nbFloors;
-  Building *newBuilding = makeBuilding(building->positionX, building->positionZ, nbFloors - 1);
+  Building *newBuilding =
+      makeBuilding(building->positionX, building->positionZ, nbFloors - 1);
   for (int i = 0; i < nbFloors - 1; i++) {
     newBuilding->floors[i] = building->floors[i];
   }
@@ -95,7 +69,8 @@ Building* removeFloor(Building *building) {
   return newBuilding;
 }
 
-void moveFloor(Building **updatedBuildings, Building *buildingSrc, Building *buildingDst) {
+void moveFloor(Building **updatedBuildings, Building *buildingSrc,
+               Building *buildingDst) {
   Floor *storedFloor = buildingSrc->floors[buildingSrc->nbFloors - 1];
   Building *newBuildingSrc = removeFloor(buildingSrc);
   Building *newBuildingDst = addFloor(buildingDst, storedFloor);
@@ -113,7 +88,8 @@ int findBuildingNb(City *city, int buildingX, int buildingZ) {
   return -1;
 }
 
-Building* stashFloor(City *city, int buildingX, int buildingZ, Building *stash, int maxStashSize) {
+Building *stashFloor(City *city, int buildingX, int buildingZ, Building *stash,
+                     int maxStashSize) {
   if (stash->nbFloors >= maxStashSize) {
     printf("ERROR: Can't stash more floors\n");
     return stash;
@@ -123,13 +99,13 @@ Building* stashFloor(City *city, int buildingX, int buildingZ, Building *stash, 
     printf("ERROR: No floor in specified building\n");
     return stash;
   }
-  Building **updatedBuildings = malloc(2 * sizeof(Building*));
+  Building **updatedBuildings = malloc(2 * sizeof(Building *));
   moveFloor(updatedBuildings, city->buildings[buildingNb], stash);
   city->buildings[buildingNb] = updatedBuildings[0];
   return updatedBuildings[1];
 }
 
-Building* dropFloor(City *city, int buildingX, int buildingZ, Building *stash) {
+Building *dropFloor(City *city, int buildingX, int buildingZ, Building *stash) {
   int buildingNb = findBuildingNb(city, buildingX, buildingZ);
   if (stash->nbFloors <= 0) {
     printf("ERROR: No floor stashed\n");
@@ -137,34 +113,22 @@ Building* dropFloor(City *city, int buildingX, int buildingZ, Building *stash) {
   }
   Building *foundBuilding = city->buildings[buildingNb];
   if (foundBuilding->nbFloors != 0 &&
-      (stash->floors[stash->nbFloors - 1]->bottomSize > foundBuilding->floors[foundBuilding->nbFloors - 1]->topSize)) {
+      (stash->floors[stash->nbFloors - 1]->bottomSize >
+       foundBuilding->floors[foundBuilding->nbFloors - 1]->topSize)) {
     printf("ERROR: Floor is too big to be placed there\n");
     return stash;
   }
-  Building **updatedBuildings = malloc(2 * sizeof(Building*));
+  Building **updatedBuildings = malloc(2 * sizeof(Building *));
   moveFloor(updatedBuildings, stash, city->buildings[buildingNb]);
   city->buildings[buildingNb] = updatedBuildings[1];
   return updatedBuildings[0];
 }
 
-Building* makeBuildingNFloors(int n) {
+Building *makeBuildingNFloors(int n) {
   Building *building = makeBuilding(0, 0, n);
   int floorSize = n;
   for (int i = 0; i < n; i++) {
-    Floor *newFloor = makeFloor(floorSize, floorSize-1, 0);
-    char modelName[100] = "floor_";
-    char nb1[2];
-    char nb2[2];
-    nb1[0] = (char) (floorSize + (int) '0');
-    nb1[1] = '\0';
-    nb2[0] = (char) (floorSize - 1 + (int) '0');
-    nb2[1] = '\0';
-    strcat(modelName, nb1);
-    strcat(modelName, "to");
-    strcat(modelName, nb2);
-    strcat(modelName, ".obj");
-    strcpy(newFloor->model, modelName);
-    newFloor->height = 0.15625;
+    Floor *newFloor = makeFloor(floorSize, floorSize - 1, 0);
     building->floors[i] = newFloor;
     floorSize--;
   }
