@@ -5,8 +5,7 @@
 #include "city_manipulation.h"
 #include "drawing.h"
 
-void drawFloor(Floor *floor, float positionX, float altitude, float positionZ,
-               int isSelected) {
+void drawFloor(Floor *floor, float positionX, float altitude, float positionZ, int isSelected) {
   Vector3 position = (Vector3){positionX + 0.5f, altitude, positionZ + 0.5f};
   Model floorModel = *(floor->model);
   float radius = 1.;
@@ -17,19 +16,16 @@ void drawFloor(Floor *floor, float positionX, float altitude, float positionZ,
 }
 
 void drawBuilding(Building *building, int isSelected) {
-  Vector3 supportPosition = (Vector3){building->positionX + 0.5f, -0.11765f,
-                                      building->positionZ + 0.5f};
+  Vector3 supportPosition = (Vector3){building->positionX + 0.5f, -0.11765f, building->positionZ + 0.5f};
   Model groundModel = *(building->groundModel);
   float radius = 1.;
   if (isSelected == 1)
-    DrawModel(groundModel, supportPosition, radius,
-              (Color){210, 210, 210, 255});
+    DrawModel(groundModel, supportPosition, radius, (Color){210, 210, 210, 255});
   else
     DrawModel(groundModel, supportPosition, radius, WHITE);
   float currentFloorHeight = 0.0;
   for (int i = 0; i < building->nbFloors; i++) {
-    drawFloor(building->floors[i], (float)building->positionX,
-              currentFloorHeight, (float)building->positionZ, isSelected);
+    drawFloor(building->floors[i], (float)building->positionX, currentFloorHeight, (float)building->positionZ, isSelected);
     currentFloorHeight += building->floors[i]->height;
   }
 }

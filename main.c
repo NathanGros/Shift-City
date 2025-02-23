@@ -70,6 +70,10 @@ int main() {
   Vector3 lightPos = {0.5f, 0.2f, 0.0f}; // Light in screen space
   SetShaderValue(shadingShader, lightPosLoc, &lightPos, SHADER_UNIFORM_VEC3);
 
+  int resolutionLoc = GetShaderLocation(shadingShader, "resolution");
+  Vector2 screenResolution = { screenWidth, screenHeight};
+  SetShaderValue(shadingShader, resolutionLoc, &screenResolution, SHADER_UNIFORM_VEC2);
+
   while (!WindowShouldClose()) {
 
     // change objective view
@@ -84,13 +88,10 @@ int main() {
     }
     if (objectiveView == 0) {
       // input
-      updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle,
-                   &targetDistance);
-      updateCursorBuildingCoordinates(camera, city1, &cursorTileX,
-                                      &cursorTileZ);
+      updateCamera(&camera, pi, speed, &verticalAngle, &horizontalAngle, &targetDistance);
+      updateCursorBuildingCoordinates(camera, city1, &cursorTileX, &cursorTileZ);
       if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-        stash =
-            stashFloor(city1, cursorTileX, cursorTileZ, stash, maxStashSize);
+        stash = stashFloor(city1, cursorTileX, cursorTileZ, stash, maxStashSize);
       }
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Building *newStash = dropFloor(city1, cursorTileX, cursorTileZ, stash);
@@ -105,53 +106,50 @@ int main() {
 
       // Render the 3D scene to textures
       BeginTextureMode(sceneTex);
-      ClearBackground(backgroundColor);
-
-      BeginMode3D(camera);
-      drawCity(city1, cursorTileX, cursorTileZ);
-      drawStash(stash, cursorTileX, cursorTileZ);
-      EndMode3D();
-
+        ClearBackground(backgroundColor);
+        BeginMode3D(camera);
+          drawCity(city1, cursorTileX, cursorTileZ);
+          drawStash(stash, cursorTileX, cursorTileZ);
+        EndMode3D();
       EndTextureMode();
+
       // Render depth separately
       BeginTextureMode(depthTex);
-      ClearBackground((Color){255, 255, 255, 255}); // White = far, Black = near
-
-      BeginMode3D(camera);
-      drawCity(city1, cursorTileX, cursorTileZ);
-      drawStash(stash, cursorTileX, cursorTileZ);
-      EndMode3D();
-
+        ClearBackground((Color){255, 255, 255, 255}); // White = far, Black = near
+        BeginMode3D(camera);
+          drawCity(city1, cursorTileX, cursorTileZ);
+          drawStash(stash, cursorTileX, cursorTileZ);
+        EndMode3D();
       EndTextureMode();
 
+      // start actual rendering to the screen
       BeginDrawing();
-      ClearBackground(backgroundColor);
-      BeginShaderMode(shadingShader);
-      // Pass the scene texture & depth texture to the shader
-      SetShaderValueTexture(shadingShader,
-                            GetShaderLocation(shadingShader, "sceneTex"),
-                            sceneTex.texture);
-      SetShaderValueTexture(shadingShader,
-                            GetShaderLocation(shadingShader, "depthTex"),
-                            depthTex.texture);
-      // Draw the full-screen quad with the shader applied
-      DrawTextureRec(sceneTex.texture,
-                     (Rectangle){0, 0, screenWidth, -screenHeight},
-                     (Vector2){0, 0}, WHITE);
-      EndShaderMode();
-
-      drawPoints(points);
-      drawObjectiveButton();
-
+        ClearBackground(backgroundColor);
+        BeginShaderMode(shadingShader);
+          // Pass the scene texture & depth texture to the shader
+          SetShaderValueTexture(shadingShader,
+                                GetShaderLocation(shadingShader, "sceneTex"),
+                                sceneTex.texture);
+          SetShaderValueTexture(shadingShader,
+                                GetShaderLocation(shadingShader, "depthTex"),
+                                depthTex.texture);
+          // Draw the full-screen quad with the shader applied
+          DrawTextureRec(sceneTex.texture,
+                         (Rectangle){0, 0, screenWidth, -screenHeight},
+                         (Vector2){0, 0}, WHITE);
+        EndShaderMode();
+        drawPoints(points);
+        drawObjectiveButton();
       EndDrawing();
-    } else {
+    }
+    else {
       BeginDrawing();
-      ClearBackground(objectivesBackgroundColor);
-      BeginMode3D(objectivesCamera);
-      drawAllObjectives(allObjectives);
-      EndMode3D();
-      drawPoints(points);
-      drawObjectiveButton();
+        ClearBackground(objectivesBackgroundColor);
+        BeginMode3D(objectivesCamera);
+          drawAllObjectives(allObjectives);
+        EndMode3D();
+        drawPoints(points);
+        drawObjectiveButton();
       EndDrawing();
     }
   }
